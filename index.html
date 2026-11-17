@@ -7,5 +7,10 @@
     <link rel="icon" type="image/png" href="/src/design-system/assets/kauelu-logo.png" />
     <title>SOLVIA 点検・保守管理</title>
   </head>
-  <body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body>
+  <body>
+    <!-- Netlify Formsの受け口。画面からは src/services/feedbackService.ts が同じ項目名で送る -->
+    <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input name="bot-field" /><input name="kind" /><input name="screen" /><textarea name="message"></textarea><input name="rating" /><input name="minutes" /><input name="inspection" /><input name="account" /><input name="name" /><input name="company" /><input name="page" /><input name="sentAt" />
+    </form>
+    <div id="root"></div><script type="module" src="/src/main.tsx"></script></body>
 </html>

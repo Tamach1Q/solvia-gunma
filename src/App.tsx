@@ -21,6 +21,8 @@ import { ScheduleScreen } from './screens/ScheduleScreen'
 import { loadState, resetState, saveState } from './services/demoStore'
 import { reportCheckService } from './services/reportCheckService'
 import { LocalField } from './screens/field/LocalField'
+import { LoginScreen } from './screens/LoginScreen'
+import { loadSession, signOut, type Session } from './services/session'
 import { SharedField } from './screens/field/SharedField'
 import { isConnectionError, resizeImage, sharedInspectionService, type FieldContext, type SharedInspection } from './services/sharedInspectionService'
 import type { Inspection, InspectionPhoto, RepairCase, ReportCheckIssue, ReportReview } from './types'
@@ -32,10 +34,17 @@ const errorMessage = (error: unknown, fallback: string) => error instanceof Erro
 
 function App() {
   const fieldToken = new URLSearchParams(window.location.search).get('field')
-  return fieldToken ? <SharedField token={fieldToken} fill={new URLSearchParams(window.location.search).get('fill') === '1'} /> : <Admin />
+  // 現場用URL（?field=）はアカウントを持たない作業員も開くので、ログインなしで現場画面だけを出す
+  return fieldToken ? <SharedField token={fieldToken} fill={new URLSearchParams(window.location.search).get('fill') === '1'} /> : <SignedIn />
 }
 
-function Admin() {
+function SignedIn() {
+  const [session, setSession] = useState<Session | null>(() => loadSession())
+  if (!session) return <LoginScreen onSignIn={setSession} />
+  return <Admin session={session} onSignOut={() => { signOut(); setSession(null) }} />
+}
+
+function Admin({ session, onSignOut }: { session: Session; onSignOut: () => void }) {
   const [view, setView] = useState<AdminView>('schedule')
   const [state, setState] = useState(() => loadState())
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -251,7 +260,7 @@ function Admin() {
     failed: share.shared.measurements.filter(entry => entry.judgement === '不適合').length,
   }
 
-  return <AppShell view={view} onNavigate={go}>
+  return <AppShell view={view} onNavigate={go} session={session} onSignOut={onSignOut}>
     {view === 'monitoring' && <MonitoringScreen sites={state.sites} inspections={state.inspections} repairCases={state.repairCases} onOpenKarte={openKarte} />}
     {view === 'schedule' && <ScheduleScreen sites={state.sites} inspections={state.inspections} reviews={state.reportReviews} onOpenReview={openReview} onOpen={openPrep} onReset={resetData} />}
     {view === 'prep' && selected && site && <PrepScreen site={site} inspection={selected} review={sourceReview} progress={sourceProgress} onReview={() => sourceReview && openReview(sourceReview.reviewId)} previous={history.at(-1)} checkpoints={checkpoints} localMode={Boolean(selected.localField)} onBack={() => { setLocalField(false); setView('schedule') }} onRequest={() => void requestField()} onReport={openReportFlow} />}

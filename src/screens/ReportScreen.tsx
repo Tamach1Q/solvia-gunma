@@ -2,6 +2,7 @@
 import { ArrowLeft, CheckCircle2, FileSearch, Pencil, Printer, RotateCcw } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { ArrayDiagram } from '../components/ArrayDiagram'
+import { ReportRatingPanel } from '../components/Feedback'
 import { PhotoDropZone, PhotoPalette } from '../components/ReportPhotoLayout'
 import { ReportWorkflowNotice } from '../components/ReportWorkflowNotice'
 import { InspectionStatusChip, JudgementMark, VisualResultMark } from '../components/ui'
@@ -139,6 +140,7 @@ export function ReportScreen({ site, inspection, previous, photos, onChange, onR
       </article>
 
       {!readOnly && <aside className="report-tools no-print">
+        <ReportRatingPanel inspectionId={inspection.inspectionId} />
         <section className="panel">
           <h2>報告書の操作</h2>
           <div className="report-actions">

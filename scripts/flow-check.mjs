@@ -44,6 +44,15 @@ try {
   await page.evaluate(() => localStorage.clear())
   await page.reload({ waitUntil: 'networkidle' })
 
+  step(0, 'ログイン：違うパスワードでは入れず、お渡ししたアカウントで入れる')
+  await page.getByTestId('login-email').fill('admin@backup-system.demo')
+  await page.getByTestId('login-password').fill('wrong')
+  await page.getByTestId('login-submit').click()
+  await page.getByText('メールアドレスかパスワードが違います。').waitFor()
+  await page.getByTestId('login-password').fill('gunma1125')
+  await page.getByTestId('login-submit').click()
+  await page.getByTestId('account-menu').getByText('株式会社バックアップシステム').waitFor()
+
   step(1, '点検予定：今月の点検がエリアごとにまとまっている')
   await page.getByRole('heading', { name: '点検予定', exact: true }).waitFor()
   await expectCount(page.getByTestId('schedule-row'), 8, '今月の点検')

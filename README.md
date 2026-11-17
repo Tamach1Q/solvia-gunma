@@ -2,6 +2,9 @@
 > - 発電所8件のエリア・名前・住所を群馬県（前橋市・渋川市・高崎市・伊勢崎市・沼田市）に置き換え。発電所の構成・点検履歴・デモの筋書きは元のまま
 > - 報告書の発行者を株式会社バックアップシステムに変更（src/config/brand.ts）
 > - localStorageのキーを solvia_gunma_v1 に変更し、seedVersion を 9 に上げた（アズマ版と同じブラウザで開いても混ざらない）
+> - ログイン画面を追加（照合だけで本物の認証はしない）。アカウントは src/config/demoAccounts.ts。現場用URL（?field=）はログインなしで開ける
+> - 「ご意見を送る」（ヘッダー）と、報告書画面の「この報告書の使い心地」（○△×・手作業なら何分か）を追加。送信先はNetlify Forms（index.htmlの隠しフォーム `feedback`）
+> - Netlifyでは、サイトの「Forms」で **フォーム検出を有効にしてから** デプロイし直すと受け付けが始まる。届いた内容はNetlifyの画面で見られ、通知（メール・Slack）は「Forms」→「Form notifications」で設定する
 
 # SOLVIA 点検・保守管理デモ
 
