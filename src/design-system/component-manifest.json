@@ -1,0 +1,349 @@
+{
+  "version": "1.1",
+  "date": "2026-10-28",
+  "theme": "Light",
+  "sourceFile": "0NPd1KsPjWSfRKc0VMWilo",
+  "figmaVariableCount": 94,
+  "textStyles": [
+    "Heading/Large",
+    "Heading/Medium",
+    "Heading/Small",
+    "Body/Default",
+    "Body/Small",
+    "Label/Default",
+    "Label/Small",
+    "Caption/Default"
+  ],
+  "components": [
+    {
+      "figmaName": "Button",
+      "nodeId": "5:22",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=5-22",
+      "css": ".ku-button",
+      "variantCount": 20,
+      "example": "index.html#buttons"
+    },
+    {
+      "figmaName": "Button/Small",
+      "nodeId": "8:72",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=8-72",
+      "css": ".ku-button.ku-button--small",
+      "variantCount": 20,
+      "example": "index.html#buttons"
+    },
+    {
+      "figmaName": "Input",
+      "nodeId": "6:33",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=6-33",
+      "css": ".ku-field, .ku-input",
+      "variantCount": 6,
+      "example": "index.html#inputs"
+    },
+    {
+      "figmaName": "AppHeader",
+      "nodeId": "12:14",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=12-14",
+      "css": ".ku-app-header",
+      "variantCount": 1,
+      "example": "index.html#layout"
+    },
+    {
+      "figmaName": "PageHeader",
+      "nodeId": "12:21",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=12-21",
+      "css": ".ku-page-header",
+      "variantCount": 1,
+      "example": "index.html#layout"
+    },
+    {
+      "figmaName": "MetricCard",
+      "nodeId": "12:43",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=12-43",
+      "css": ".ku-metric-card[data-tone]",
+      "variantCount": 3,
+      "example": "index.html#metrics"
+    },
+    {
+      "figmaName": "NavigationItem",
+      "nodeId": "12:53",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=12-53",
+      "css": ".ku-nav-item",
+      "variantCount": 3,
+      "example": "index.html#layout"
+    },
+    {
+      "figmaName": "Sidebar",
+      "nodeId": "14:224",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=14-224",
+      "css": ".ku-sidebar",
+      "variantCount": 1,
+      "example": "index.html#layout"
+    },
+    {
+      "figmaName": "BarChart",
+      "nodeId": "13:64",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=13-64",
+      "css": ".ku-chart, .ku-chart__bar--primary, .ku-chart__bar--secondary",
+      "variantCount": 1,
+      "example": "index.html#charts"
+    },
+    {
+      "figmaName": "LineChart",
+      "nodeId": "13:91",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=13-91",
+      "css": ".ku-chart, .ku-chart__line--primary, .ku-chart__line--secondary",
+      "variantCount": 1,
+      "example": "index.html#charts"
+    },
+    {
+      "figmaName": "ChartTooltip",
+      "nodeId": "13:96",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=13-96",
+      "css": ".ku-chart-tooltip",
+      "variantCount": 1,
+      "example": "index.html#charts"
+    },
+    {
+      "figmaName": "ChartCard",
+      "nodeId": "13:261",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=13-261",
+      "css": ".ku-chart-card[data-state]",
+      "variantCount": 8,
+      "example": "index.html#charts"
+    },
+    {
+      "figmaName": "IconButton",
+      "nodeId": "21:520",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=21-520",
+      "css": ".ku-button.ku-icon-button",
+      "variantCount": 20,
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "IconButton/Small",
+      "nodeId": "21:625",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=21-625",
+      "css": ".ku-button.ku-icon-button.ku-button--small",
+      "variantCount": 20,
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "OptionItem",
+      "nodeId": "22:408",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=22-408",
+      "css": ".ku-option",
+      "variantCount": 4,
+      "example": "index.html#selection"
+    },
+    {
+      "figmaName": "SelectionChip",
+      "nodeId": "22:421",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=22-421",
+      "css": ".ku-selection-chip",
+      "variantCount": 2,
+      "example": "index.html#selection"
+    },
+    {
+      "figmaName": "ComboboxMenu",
+      "nodeId": "22:448",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=22-448",
+      "css": ".ku-combobox-menu",
+      "variantCount": 3,
+      "example": "index.html#combobox"
+    },
+    {
+      "figmaName": "Combobox",
+      "nodeId": "22:629",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=22-629",
+      "css": ".ku-combobox[data-mode][data-state]",
+      "variantCount": 12,
+      "example": "index.html#combobox"
+    },
+    {
+      "figmaName": "RadioOption",
+      "nodeId": "24:803",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=24-803",
+      "css": ".ku-radio",
+      "variantCount": 6,
+      "example": "index.html#fieldset"
+    },
+    {
+      "figmaName": "FormMessage",
+      "nodeId": "24:851",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=24-851",
+      "css": ".ku-form-message",
+      "variantCount": 2,
+      "example": "index.html#selection"
+    },
+    {
+      "figmaName": "Fieldset",
+      "nodeId": "24:1008",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=24-1008",
+      "css": ".ku-fieldset",
+      "variantCount": 6,
+      "example": "index.html#fieldset"
+    },
+    {
+      "figmaName": "Icon/trash-can",
+      "nodeId": "20:345",
+      "css": ".ku-icon.ku-icon--trash-can",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/trash-can.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/chevron-down",
+      "nodeId": "20:348",
+      "css": ".ku-icon.ku-icon--chevron-down",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/chevron-down.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/pen",
+      "nodeId": "20:351",
+      "css": ".ku-icon.ku-icon--pen",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/pen.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/chevron-right",
+      "nodeId": "20:354",
+      "css": ".ku-icon.ku-icon--chevron-right",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/chevron-right.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/download",
+      "nodeId": "20:357",
+      "css": ".ku-icon.ku-icon--download",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/download.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/plus",
+      "nodeId": "20:360",
+      "css": ".ku-icon.ku-icon--plus",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/plus.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/check",
+      "nodeId": "20:363",
+      "css": ".ku-icon.ku-icon--check",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/check.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/gear",
+      "nodeId": "20:366",
+      "css": ".ku-icon.ku-icon--gear",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/gear.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/circle-info",
+      "nodeId": "20:369",
+      "css": ".ku-icon.ku-icon--circle-info",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/circle-info.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/circle-plus",
+      "nodeId": "20:372",
+      "css": ".ku-icon.ku-icon--circle-plus",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/circle-plus.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/circle-xmark",
+      "nodeId": "20:375",
+      "css": ".ku-icon.ku-icon--circle-xmark",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/circle-xmark.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/triangle-exclamation",
+      "nodeId": "20:378",
+      "css": ".ku-icon.ku-icon--triangle-exclamation",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/triangle-exclamation.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/calendar",
+      "nodeId": "20:381",
+      "css": ".ku-icon.ku-icon--calendar",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/calendar.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Icon/magnifying-glass",
+      "nodeId": "20:384",
+      "css": ".ku-icon.ku-icon--magnifying-glass",
+      "variantCount": 1,
+      "asset": "assets/fontawesome/magnifying-glass.svg",
+      "example": "index.html#icons"
+    },
+    {
+      "figmaName": "Stepper",
+      "nodeId": "36:510",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=36-510",
+      "css": ".ku-stepper",
+      "variantCount": 6,
+      "example": "interactions.html"
+    },
+    {
+      "figmaName": "StepperItem",
+      "nodeId": "36:451",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=36-451",
+      "css": ".ku-stepper__step",
+      "variantCount": 8,
+      "example": "interactions.html"
+    },
+    {
+      "figmaName": "Panel",
+      "nodeId": "36:876",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=36-876",
+      "css": ".ku-panel, .ku-panel--emphasized",
+      "variantCount": 2,
+      "example": "interactions.html"
+    },
+    {
+      "figmaName": "IconContainer",
+      "nodeId": "36:430",
+      "url": "https://www.figma.com/design/0NPd1KsPjWSfRKc0VMWilo/Design-System?node-id=36-430",
+      "css": ".ku-icon-container",
+      "variantCount": 4,
+      "example": "interactions.html"
+    }
+  ],
+  "compositions": [
+    {
+      "figmaName": "Dashboard / Example",
+      "nodeId": "14:225",
+      "html": "dashboard.html",
+      "css": ".ku-dashboard"
+    },
+    {
+      "figmaName": "Interaction patterns / Review",
+      "nodeId": "36:915",
+      "example": "interactions.html"
+    }
+  ],
+  "implementationNotes": {
+    "css": "Framework-independent; wrapper .ku-root. Requires relative assets folder.",
+    "behavior": "Optional reference demo.js, no external requests. Not an API-connected application.",
+    "mobile": "Supplemental CSS layouts; Figma source is desktop-only."
+  }
+}

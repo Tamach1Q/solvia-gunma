@@ -1,0 +1,41 @@
+/* Figma 36:915 — Interaction refinement, 2026-10-28. */
+.ku-panel--emphasized { border-color:var(--color-border-strong); }
+.ku-icon-container { display:inline-flex; align-items:center; justify-content:center; flex:0 0 40px; width:40px; height:40px; border-radius:var(--radius-lg); line-height:0; }
+.ku-icon-container--small { flex-basis:32px; width:32px; height:32px; }
+.ku-icon-container--subtle { background:var(--color-bg-subtle); }
+.ku-icon-container>.ku-icon { display:block; color:inherit; width:24px; height:24px; }
+.ku-icon-container--small>.ku-icon { width:16px; height:16px; }
+.ku-icon-container>:is(svg,.ku-icon) { display:block; width:24px; height:24px; }
+.ku-icon-container--small>:is(svg,.ku-icon) { width:16px; height:16px; }
+.ku-button>.ku-icon,.ku-button>svg { display:block; }
+.ku-stepper { --step-size:32px; --step-gap:24px; display:flex; list-style:none; margin:0; padding:0; background:transparent; }
+.ku-stepper__step { position:relative; flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:var(--space-3); min-height:100px; }
+.ku-stepper__step:not(:last-child)::after { content:""; position:absolute; top:calc(var(--step-size) / 2); left:calc(50% + var(--step-size) / 2); width:calc(100% - var(--step-size)); height:1px; background:var(--color-border-subtle); }
+.ku-stepper__step[data-state="complete"]::after { background:var(--color-info); }
+.ku-stepper__marker { position:relative; display:inline-flex; align-items:center; justify-content:center; flex:0 0 var(--step-size); width:var(--step-size); height:var(--step-size); border:1px solid var(--color-border-control); border-radius:50%; background:var(--color-bg-surface); color:var(--color-text-primary); line-height:1; }
+.ku-stepper__number { display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-size:var(--font-size-body-sm); }
+.ku-stepper__step[data-state="current"] .ku-stepper__marker { background:var(--color-info); border-color:var(--color-info); color:var(--color-text-inverse); }
+.ku-stepper__step[data-state="complete"] .ku-stepper__marker { border-color:var(--color-info); }
+.ku-stepper__badge { position:absolute; right:-5px; top:-5px; width:16px; height:16px; display:flex; align-items:center; justify-content:center; border:2px solid var(--color-bg-surface); border-radius:50%; background:var(--color-info); color:var(--color-text-inverse); }
+.ku-stepper__badge .ku-icon { width:8px; height:8px; color:inherit; }
+
+.ku-stepper__step[data-state="error"] .ku-stepper__badge { background:var(--color-text-secondary); }
+.ku-stepper__body { min-width:0; text-align:center; padding-inline:var(--space-1); }
+.ku-stepper__title { font-size:var(--font-size-body-sm); line-height:var(--line-height-body); font-weight:400; color:var(--color-text-secondary); overflow-wrap:anywhere; }
+.ku-stepper__step[data-state="current"] .ku-stepper__title { font-weight:700; line-height:1.5; color:var(--color-text-primary); }
+.ku-stepper__content { margin-top:var(--space-3); font-size:var(--font-size-body-sm); }
+.ku-stepper--vertical { flex-direction:column; padding:0; border:0; background:transparent; }
+.ku-stepper--vertical .ku-stepper__step { flex-direction:row; align-items:flex-start; justify-content:flex-start; gap:var(--space-4); padding-bottom:var(--step-gap); min-height:80px; }
+.ku-stepper--vertical .ku-stepper__step:last-child { padding-bottom:0; }
+.ku-stepper--vertical .ku-stepper__step::after { left:calc(var(--step-size) / 2); top:var(--step-size); width:1px; height:calc(100% - var(--step-size)); }
+.ku-stepper--vertical .ku-stepper__body { text-align:left; flex:1; padding:var(--space-1) 0 0; }
+.ku-stepper--vertical .ku-stepper__title { font-size:var(--font-size-body-sm); }
+@media(max-width:720px) {
+  .ku-stepper:not(.ku-stepper--vertical) { flex-direction:column; gap:0; padding:0; }
+  .ku-stepper:not(.ku-stepper--vertical) .ku-stepper__step { flex-direction:row; align-items:flex-start; gap:var(--space-4); padding-bottom:var(--space-5); min-height:80px; }
+  .ku-stepper:not(.ku-stepper--vertical) .ku-stepper__step:last-child { padding-bottom:0; }
+  .ku-stepper:not(.ku-stepper--vertical) .ku-stepper__step::after { left:calc(var(--step-size) / 2); top:var(--step-size); width:1px; height:calc(100% - var(--step-size)); }
+  .ku-stepper:not(.ku-stepper--vertical) .ku-stepper__body { text-align:left; padding:var(--space-1) 0 0; }
+}
+
+.ku-stepper__description { font-size:var(--font-size-caption); line-height:var(--line-height-body); color:var(--color-text-secondary); }
