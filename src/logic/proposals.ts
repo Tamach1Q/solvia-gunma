@@ -56,5 +56,6 @@ export function buildProposals(inspection: Inspection, site: Site, previous?: In
   const failed = inspection.measurements.filter(entry => entry.judgement === '不適合' && !merged.some(item => item.entry === entry)).map(measurementProposal)
   const visual = visualFailures.filter(entry => !merged.some(item => item.visual === entry)).map(entry => visualProposal(entry.itemId, entry.comment))
   const caution = inspection.measurements.filter(entry => entry.judgement === '要確認').map(measurementProposal)
-  return [...merged.map(mergedProposal), ...failed, ...visual, ...caution]
+  const observation = inspection.visual.filter(entry => entry.result === '△').map(entry => `${visualItems.find(item => item.itemId === entry.itemId)?.title ?? entry.itemId}について${sentence(entry.comment)}。次回点検で状態の変化を確認します。`)
+  return [...merged.map(mergedProposal), ...failed, ...visual, ...observation, ...caution]
 }

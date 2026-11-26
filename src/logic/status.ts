@@ -6,6 +6,8 @@ export type Tone = 'neutral' | 'blue' | 'amber' | 'green' | 'red'
 // 管理側が次に手を動かす状態（提出済み・報告書作成済み）は amber
 export const inspectionStatusTone: Record<InspectionStatus, Tone> = { 未依頼: 'neutral', 依頼済み: 'blue', 点検中: 'blue', 提出済み: 'amber', 報告書作成済み: 'amber', 完了: 'green' }
 
+export const inspectionStatusLabel = (status: InspectionStatus) => status === '報告書作成済み' ? '報告書の作成・確認' : status === '依頼済み' ? 'リンク発行済み' : status
+
 const statusOrder: InspectionStatus[] = ['未依頼', '依頼済み', '点検中', '提出済み', '報告書作成済み', '完了']
 
 // 現場の共有状態を点検のステータスへ反映する。後戻りはさせない（やり直しは reset で明示的に戻す）。

@@ -23,7 +23,7 @@ export function checkReport(review: ReportReview, site: Site): ReportCheckIssue[
     else if (photo.siteId !== site.siteId) add(`photo:${attachment.attachmentId}`, '写真', '別の発電所の写真が掲載されています', photo.photoType, `${site.name}で撮影した写真`)
     else if (photo.inspectionItemId !== attachment.itemId) add(`photo:${attachment.attachmentId}`, '写真', '写真と点検項目が一致しません', reviewItemTitle(photo.inspectionItemId), title)
   }
-  for (const visual of review.inspection.visual.filter(entry => entry.result === '×')) {
+  for (const visual of review.inspection.visual.filter(entry => entry.result === '×' || entry.result === '△')) {
     if (!review.attachments.some(item => item.itemId === visual.itemId)) add(`missing-photo:${visual.itemId}`, '写真', `${reviewItemTitle(visual.itemId)}の指摘写真がありません`, '掲載なし', '指摘箇所が分かる写真')
   }
   return issues

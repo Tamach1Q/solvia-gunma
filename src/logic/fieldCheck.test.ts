@@ -1,3 +1,4 @@
+import { buildMeasurementEntries } from './judge'
 import { describe, expect, it } from 'vitest'
 import { applyScenario } from '../mock/scenario'
 import { createSeed, demoSiteId } from '../mock/seed'
@@ -8,14 +9,14 @@ import { measurementKey } from './judge'
 
 const seed = createSeed(new Date(2026, 9, 28))
 const site = seed.sites.find(item => item.siteId === demoSiteId)!
-const current = seed.inspections.find(item => item.siteId === demoSiteId && item.status === '未依頼')!
+const current = { ...seed.inspections.find(item => item.siteId === demoSiteId && item.status === '未依頼')!, measurements: buildMeasurementEntries(site) }
 const previous = pastInspections(seed.inspections, current).at(-1)
 
 describe('入力漏れチェック', () => {
-  it('何も入れていなければ、天候・目視20項目・測定25欄がすべて漏れになる', () => {
+  it('何も入れていなければ、天候・目視21項目・測定25欄がすべて漏れになる', () => {
     const missing = missingItems(current)
     expect(missing[0]).toMatchObject({ step: 'start', title: '天候' })
-    expect(missing.filter(item => item.step === 'visual')).toHaveLength(20)
+    expect(missing.filter(item => item.step === 'visual')).toHaveLength(21)
     expect(missing.filter(item => item.step === 'measure')).toHaveLength(25)
   })
   it('デモ入力（写真付き）なら漏れはない', () => {
@@ -24,7 +25,7 @@ describe('入力漏れチェック', () => {
   })
   it('×なのにコメント・写真がないものを挙げる', () => {
     const filled = applyScenario(current, site, previous)
-    const broken = { ...filled, visual: filled.visual.map(entry => entry.itemId === 'AR-01' ? { ...entry, comment: ' ', photoIds: [] } : entry) }
+    const broken = { ...filled, visual: filled.visual.map(entry => entry.itemId === '2-2' ? { ...entry, comment: ' ', photoIds: [] } : entry) }
     expect(missingItems(broken).map(item => item.reason)).toEqual(['×の内容（コメント）がありません', '×なのに写真がありません'])
   })
   it('読めない測定値は「数値として読み取れません」', () => {

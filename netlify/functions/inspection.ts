@@ -99,7 +99,7 @@ export default async (request: Request) => {
     const photoId = crypto.randomUUID()
     const photo: SharedPhoto = { photoId, inspectionItemId: String(body.inspectionItemId || ''), equipmentId: String(body.equipmentId || ''), photoType: String(body.photoType || '点検写真'), takenAt: now, contentType: match[1] }
     await store.set(`photo-${token}-${photoId}`, bytes, { metadata: { contentType: photo.contentType } })
-    const next = { ...state, status: 'in_progress' as const, photos: [...state.photos.filter(entry => !(entry.inspectionItemId === photo.inspectionItemId && entry.photoType === photo.photoType)), photo], updatedAt: now }
+    const next = { ...state, status: 'in_progress' as const, photos: [...state.photos, photo], updatedAt: now }
     await store.setJSON(stateKey, next)
     return json({ ...photo, url: `/.netlify/functions/inspection?token=${token}&photo=${photoId}` }, 201)
   }

@@ -1,6 +1,7 @@
+import { loadLibraryPhoto, loadInspectionPhoto } from '../../services/photoLibraryService'
 import { AlertTriangle } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { applyScenario, scenarioPhotoId, scenarioPhotoUrl } from '../../mock/scenario'
+import { applyScenario, scenarioPhotos } from '../../mock/scenario'
 import { sharedInspectionService, type FieldEntries, type SharedInspection } from '../../services/sharedInspectionService'
 import type { InspectionPhoto } from '../../types'
 import { FieldApp } from './FieldApp'
@@ -43,16 +44,25 @@ export function SharedField({ token, fill }: { token: string; fill: boolean }) {
     onChange={next => { dirty.current = true; setEntries(next) }}
     onUploadPhoto={async (target, file) => {
       const photo = await sharedInspectionService.uploadPhoto(token, { inspectionItemId: target.refKey, equipmentId: '' }, target.label, file)
-      setPhotos(current => [...current.filter(item => !(item.inspectionItemId === photo.inspectionItemId && item.photoType === photo.photoType)), photo])
+      setPhotos(current => [...current.filter(item => item.photoId !== photo.photoId), photo])
+      return photo
+    }}
+    onSelectPhoto={async (target, id) => {
+      const photo = await sharedInspectionService.uploadPhoto(token, { inspectionItemId: target.refKey, equipmentId: '' }, target.label, await loadLibraryPhoto(id))
+      setPhotos(current => [...current.filter(item => item.photoId !== photo.photoId), photo])
       return photo
     }}
     onFillRest={fill ? async () => { try {
       const filled = applyScenario({ ...entries, inspectionId: shared.inspectionId, siteId: shared.siteId, scheduledOn: shared.context.scheduledOn, inspector: shared.context.inspector, status: '点検中' }, shared.context.site, { measurements: shared.context.previousMeasurements })
-      // シナリオの写真（図）もアップロードして、管理側に届くようにする
-      const blob = await (await fetch(scenarioPhotoUrl)).blob()
-      const photo = await sharedInspectionService.uploadPhoto(token, { inspectionItemId: 'AR-01', equipmentId: '' }, 'モジュール表面ガラスの割れ', new File([blob], 'scenario.svg', { type: blob.type }))
-      setPhotos(current => [...current.filter(item => item.photoId !== photo.photoId), photo])
-      const swap = (ids: string[]) => ids.map(id => id === scenarioPhotoId(shared.inspectionId) ? photo.photoId : id)
+      const replacements = new Map<string, string>()
+      const uploaded: InspectionPhoto[] = []
+      for (const source of scenarioPhotos(shared.inspectionId, !!entries.measurements.length).filter(photo => filled.visual.some(entry => entry.photoIds.includes(photo.photoId)))) {
+        const photo = await sharedInspectionService.uploadPhoto(token, { inspectionItemId: source.inspectionItemId, equipmentId: '' }, source.photoType, await loadInspectionPhoto(source))
+        replacements.set(source.photoId, photo.photoId)
+        uploaded.push(photo)
+      }
+      setPhotos(current => [...current, ...uploaded])
+      const swap = (ids: string[]) => ids.map(id => replacements.get(id) ?? id)
       dirty.current = true
       setEntries({ visual: filled.visual.map(entry => ({ ...entry, photoIds: swap(entry.photoIds) })), measurements: filled.measurements, findings: filled.findings.map(finding => ({ ...finding, photoIds: swap(finding.photoIds) })), weather: filled.weather })
     } catch (reason) { setError(errorMessage(reason, '一括入力できませんでした')) } } : undefined}

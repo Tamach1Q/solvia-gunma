@@ -18,7 +18,7 @@ export function inspectionFromReview(review: ReportReview, previous = review): I
 const content = (inspection: Inspection, site: Site) => JSON.stringify({
   siteId: inspection.siteId, scheduledOn: inspection.scheduledOn, inspectedOn: inspection.inspectedOn ?? inspection.scheduledOn,
   inspector: inspection.inspector, weather: inspection.weather, visual: inspection.visual, measurements: inspection.measurements, findings: inspection.findings,
-  header: inspection.reportHeader ?? { siteName: site.name, owner: site.owner }, text: inspection.reportText ?? buildReportText(inspection, site), layout: inspection.reportLayout ?? [], options: inspection.reportOptions,
+  header: inspection.reportHeader ?? { siteName: site.name, owner: site.owner }, text: inspection.reportText ?? buildReportText(inspection, site), layout: inspection.reportLayout ?? [], options: inspection.reportOptions, format: inspection.reportFormat ?? 'A', contractor: inspection.reportContractor, caseNo: inspection.reportCaseNo, issuedOn: inspection.reportIssuedOn,
 })
 
 export const reviewMatchesInspection = (review: ReportReview, inspection: Inspection, site: Site) => review.inspection.inspectionId === inspection.inspectionId && content(inspectionFromReview(review), site) === content(inspection, site)

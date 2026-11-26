@@ -8,7 +8,7 @@ import type { ReportCheckIssue, ReportReview, ReportReviewStatus, Site } from '.
 const tone = (status: ReportReviewStatus) => status === '承認済み' ? 'green' : status === '差し戻し' ? 'red' : 'amber'
 const counts = (count: number) => `${formatNumber(count)}件`
 
-export function ReportCheckListScreen({ reviews, onOpen }: { reviews: ReportReview[]; onOpen: (reviewId: string) => void }) {
+export function ReportCheckListScreen({ reviews, onOpen, onPreview }: { reviews: ReportReview[]; onOpen: (reviewId: string) => void; onPreview: (reviewId: string) => void }) {
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<ReportReviewStatus | 'すべて'>('すべて')
   const pending = reviews.filter(review => review.status === 'チェック待ち').sort((a, b) => a.submittedAt.localeCompare(b.submittedAt))
@@ -16,7 +16,7 @@ export function ReportCheckListScreen({ reviews, onOpen }: { reviews: ReportRevi
   const visible = reviews.filter(review => (filter === 'すべて' || review.status === filter) && `${review.siteName} 定期点検報告書 ${review.inspection.inspector} ${review.owner}`.normalize('NFKC').toLowerCase().includes(search)).sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
 
   return <div className="page report-check-page" data-testid="report-check-list">
-    <div className="page-heading"><div><h1>報告書チェック</h1><p>提出された報告書の記入ミスを確認し、承認した記録を残します。</p></div></div>
+    <div className="page-heading"><div><h1>報告書チェック</h1><p>報告書の閲覧・内容確認・承認を行います。</p></div><button className="button button-secondary" onClick={() => { setFilter('承認済み'); document.getElementById('all-reports-title')?.scrollIntoView({ block: 'start' }) }}>完成済みの報告書を見る</button></div>
     <section aria-labelledby="pending-reports-title">
       <div className="review-section-heading"><h2 id="pending-reports-title">チェック待ち <span>{counts(pending.length)}</span></h2><span>提出日時が古い順</span></div>
       {pending.length ? <div className="review-pending-grid">{pending.map(review => <article className="panel review-pending-card" key={review.reviewId} data-testid="review-pending">
@@ -39,7 +39,7 @@ export function ReportCheckListScreen({ reviews, onOpen }: { reviews: ReportRevi
         <div><h3>{review.siteName}</h3><p>定期点検 · 点検日 {formatDateWithWeekday(review.inspection.inspectedOn ?? review.inspection.scheduledOn)} · {review.inspection.inspector}</p></div>
         <StatusChip label={review.status} tone={tone(review.status)} />
         <div className="review-decision-meta">{review.reviewedAt ? <><span>{review.status === '承認済み' ? '承認' : '差し戻し'} {formatDateTime(review.reviewedAt)}</span><span>{review.reviewedBy}</span></> : <span>承認待ち</span>}</div>
-        <button className="button button-secondary" onClick={() => onOpen(review.reviewId)} aria-label={`${review.siteName}の報告書を開く`}>開く</button>
+        <button className="button button-secondary" onClick={() => onOpen(review.reviewId)} aria-label={`${review.siteName}の報告書を開く`}>チェック状況</button><button className="button button-secondary" onClick={() => onPreview(review.reviewId)} aria-label={`${review.siteName}の報告書を表示`}>報告書を表示</button>
       </article>)}</div> : <div className="panel empty-state"><strong>条件に合う報告書がありません</strong><span>検索語や状態の絞り込みを変更してください。</span><button className="button button-secondary" onClick={() => { setQuery(''); setFilter('すべて') }}>検索条件をクリア</button></div>}
     </section>
   </div>
@@ -54,6 +54,7 @@ type DetailProps = {
 }
 
 export function ReportCheckDetailScreen({ review, site, sites, busy, error, onBack, onCheck, onChange, onConfirm, onApprove, onReturn, onResubmit, onOpenReport, onOpenSource, onOpenSchedule, completed }: DetailProps) {
+  const [photosOpen, setPhotosOpen] = useState(false)
   const [reviewer, setReviewer] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [returnNote, setReturnNote] = useState('')
@@ -61,6 +62,7 @@ export function ReportCheckDetailScreen({ review, site, sites, busy, error, onBa
   const issues = checked ? review.check!.issues : []
   const unresolved = checked ? unresolvedIssues(review, site) : []
   const readOnly = review.status === '承認済み'
+  useEffect(() => { if (review.check?.issues.some(issue => issue.category === '写真')) setPhotosOpen(true) }, [review.check?.fingerprint])
   useEffect(() => setConfirmed(false), [review.check?.fingerprint])
 
   const replacePhoto = (attachmentId: string, photoId: string) => onChange({ attachments: review.attachments.map(item => item.attachmentId === attachmentId ? { ...item, photoId } : item) })
@@ -70,18 +72,18 @@ export function ReportCheckDetailScreen({ review, site, sites, busy, error, onBa
     <div className="page-heading"><div><h1>{review.siteName}</h1><p>定期点検報告書 · 提出 {formatDateTime(review.submittedAt)} · {review.inspection.inspector}</p></div><StatusChip label={review.status} tone={tone(review.status)} /></div>
     {review.status === '差し戻し' && <div className="alert-fail review-feedback" role="status"><div><strong>差し戻し理由</strong><p>{review.returnNote}</p><small>{review.reviewedBy} · {review.reviewedAt && formatDateTime(review.reviewedAt)}</small></div><button className="button button-secondary" onClick={onResubmit}>修正内容を再提出</button></div>}
     {readOnly && <div className="notice review-feedback" role="status"><CheckCircle2 /><div><strong>承認済みの報告書です</strong><span>{review.reviewedBy} · {review.reviewedAt && formatDateTime(review.reviewedAt)} · {completed ? '点検完了' : '点検完了待ち'}</span></div></div>}
-    <div className="review-case-links"><button className={`button button-${readOnly && !completed ? 'primary' : 'secondary'}`} onClick={onOpenSource} data-testid="review-open-source">{review.status === '差し戻し' ? '元の報告書を修正' : readOnly ? '承認した報告書を開く' : '元の点検報告書を開く'}</button><button className="button button-secondary" onClick={onOpenSchedule} data-testid="review-open-schedule">点検予定で状態を見る</button><span>報告書の修正内容は、同じ点検案件にも保存されます。</span></div>
+    <div className="review-case-links"><button className={`button button-${readOnly && !completed ? 'primary' : 'secondary'}`} onClick={onOpenSource} data-testid="review-open-source">{review.status === '差し戻し' ? '元の報告書を修正' : readOnly ? '承認した報告書を開く' : '元の点検報告書を開く'}</button><button className="button button-secondary" onClick={onOpenSchedule} data-testid="review-open-schedule">点検予定で状態を見る</button><button className="button button-secondary" onClick={onOpenReport}>報告書全体を開く</button><span>報告書の修正内容は、同じ点検案件にも保存されます。</span></div>
     <div className="review-detail-layout">
       <div className="review-document-column">
         <section className="panel review-document">
-          <div className="panel-header"><h2>報告書の記載内容</h2><button className="button button-ghost" onClick={onOpenReport}>報告書全体を開く</button></div>
+          <div className="panel-header"><h2>報告書の記載内容</h2></div>
           <div className="review-document-body">
             <label className="review-input"><span>発電所名</span><input value={review.siteName} disabled={readOnly} onChange={event => onChange({ siteName: event.target.value })} /></label>
             <label className="review-input"><span>オーナー名</span><input value={review.owner} disabled={readOnly} onChange={event => onChange({ owner: event.target.value })} data-testid="review-owner" /></label>
             <dl className="review-facts"><div><dt>点検日</dt><dd>{formatDateWithWeekday(review.inspection.inspectedOn ?? review.inspection.scheduledOn)}</dd></div><div><dt>所在地</dt><dd>{site.address}</dd></div></dl>
             <label className="review-input"><span>点検者</span><input value={review.inspection.inspector} disabled={readOnly} onChange={event => onChange({ inspection: { ...review.inspection, inspector: event.target.value } })} /></label>
             <label className="review-input"><span>総合所見</span><textarea value={review.inspection.reportText?.summary ?? ''} disabled={readOnly} onChange={event => onChange({ inspection: { ...review.inspection, reportText: { summary: event.target.value, proposals: review.inspection.reportText?.proposals ?? [] } } })} /></label>
-            <h3 className="review-photo-heading">掲載写真 <span>{counts(review.attachments.length)}</span></h3>
+            <details className="review-photos-details" open={photosOpen} onToggle={event => setPhotosOpen(event.currentTarget.open)}><summary>掲載写真を確認・差し替え（{counts(review.attachments.length)}）</summary>
             {review.attachments.length ? review.attachments.map(attachment => {
               const photo = review.photos.find(item => item.photoId === attachment.photoId)
               const source = sites.find(item => item.siteId === photo?.siteId)
@@ -91,7 +93,7 @@ export function ReportCheckDetailScreen({ review, site, sites, busy, error, onBa
                 <figcaption><strong>{reviewItemTitle(attachment.itemId)}</strong><span>登録元：{source?.name ?? '登録情報なし'}</span><span>{photo?.photoType}</span></figcaption>
                 {!readOnly && candidates.length > 0 && <label className="review-input"><span>掲載する写真</span><select aria-label={`${reviewItemTitle(attachment.itemId)}の掲載写真`} value={attachment.photoId} onChange={event => replacePhoto(attachment.attachmentId, event.target.value)}>{!candidates.some(item => item.photoId === attachment.photoId) && <option value={attachment.photoId}>現在の写真（{source?.name ?? '登録情報なし'}）</option>}{candidates.map(item => <option key={item.photoId} value={item.photoId}>{item.photoType}</option>)}</select></label>}
               </figure>
-            }) : <p className="text-muted">掲載写真はありません。</p>}
+            }) : <p className="text-muted">掲載写真はありません。</p>}</details>
           </div>
         </section>
       </div>

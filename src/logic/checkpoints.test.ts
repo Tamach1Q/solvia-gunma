@@ -28,7 +28,7 @@ describe('今回の確認ポイント', () => {
   })
   it('デモ対象：前回指摘（雑草）は重点確認、除草は完了済みなので未対応の修繕には出ない', () => {
     const points = checkpointsOf(demoSiteId)
-    expect(points.filter(point => point.kind === 'previousFinding').map(point => point.target)).toEqual(['周囲の状況（雑草・影・鳥の巣）'])
+    expect(points.filter(point => point.kind === 'previousFinding').map(point => point.target)).toEqual(['除草状況'])
     expect(points.some(point => point.kind === 'openRepair')).toBe(false)
     expect(points.filter(point => point.kind === 'trend')).toHaveLength(1)
     expect(points.some(point => point.kind === 'nearThreshold')).toBe(false)
@@ -39,9 +39,9 @@ describe('今回の確認ポイント', () => {
   it('筋書きにない確認ポイントは出ない（乱数で低下傾向などができない）', () => {
     const summary = seed.sites.map(site => [site.siteId, checkpointsOf(site.siteId).map(point => `${point.kind}:${point.target}`)])
     expect(Object.fromEntries(summary)).toEqual({
-      'S-01': [], 'S-02': [], 'S-04': [], 'S-05': [], 'S-06': [],
-      'S-03': ['trend:PCS-2 回路2 絶縁抵抗（DC）', 'previousFinding:周囲の状況（雑草・影・鳥の巣）'],
-      'S-07': ['previousFinding:避雷素子（SPD）の劣化', 'openRepair:接続箱2 SPD交換'],
+      'S-01': [], 'S-02': [], 'S-04': ['previousFinding:運転状態'], 'S-05': [], 'S-06': [],
+      'S-03': ['trend:PCS-2 回路2 絶縁抵抗（DC）', 'previousFinding:除草状況'],
+      'S-07': ['previousFinding:分電盤・ブレーカー', 'openRepair:接続箱2 SPD交換'],
       'S-08': ['nearThreshold:PCS-1 回路1 絶縁抵抗（DC）'],
     })
   })
