@@ -23,16 +23,16 @@ export function RepairListScreen({ sites, inspections, repairCases, onOpen }: { 
       {repairSteps.map(step => <div key={step} className={step === 'お客様確認中' && repairCases.some(item => item.status === step) ? 'is-alert' : ''}><span>{step}</span><strong>{repairCases.filter(item => item.status === step).length}</strong></div>)}
     </section>
     <section className="panel">
-      {rows.length ? <table className="data-table">
+      {rows.length ? <table className="data-table mobile-record-table">
         <thead><tr><th>指摘</th><th>発電所</th><th>点検日</th><th>お客様の回答</th><th>状態</th></tr></thead>
         <tbody>{rows.map(repair => {
           const inspection = inspections.find(item => item.inspectionId === repair.inspectionId)
           return <tr key={repair.caseId} data-testid="repair-row">
-            <td><button className="link-button" onClick={() => onOpen(repair.caseId)}>{repair.title}</button></td>
-            <td>{sites.find(site => site.siteId === repair.siteId)?.name}</td>
-            <td className="numeric-cell">{inspection ? formatShortDate(inspection.inspectedOn ?? inspection.scheduledOn) : '—'}</td>
-            <td>{repair.customerDecision ?? <span className="text-muted">未回答</span>}</td>
-            <td><StatusChip label={repairResult(repair)} tone={repairTone(repairResult(repair))} /></td>
+            <td data-label="指摘"><button className="link-button" onClick={() => onOpen(repair.caseId)}>{repair.title}</button></td>
+            <td data-label="発電所">{sites.find(site => site.siteId === repair.siteId)?.name}</td>
+            <td data-label="点検日" className="numeric-cell">{inspection ? formatShortDate(inspection.inspectedOn ?? inspection.scheduledOn) : '—'}</td>
+            <td data-label="お客様の回答">{repair.customerDecision ?? <span className="text-muted">未回答</span>}</td>
+            <td data-label="状態"><StatusChip label={repairResult(repair)} tone={repairTone(repairResult(repair))} /></td>
           </tr>
         })}</tbody>
       </table> : <p className="panel-empty">修繕案件はありません。点検を完了すると、不適合と目視の×から自動で作られます。</p>}
@@ -60,7 +60,7 @@ export function RepairDetailScreen({ repair, site, inspection, photos, onChange,
       <section className="panel">
         <header className="panel-header"><h2>指摘の内容</h2></header>
         <div className="repair-issue">
-          {issue && <p className="repair-issue-head">{issue.mark === '×' ? <VisualResultMark result="×" /> : <JudgementMark judgement={issue.mark} />}<strong>{issue.title}</strong>{issue.value && <span className="numeric text-fail">{issue.value}</span>}</p>}
+          {issue && <p className="repair-issue-head">{issue.mark === '×' || issue.mark === '△' ? <VisualResultMark result={issue.mark} /> : <JudgementMark judgement={issue.mark} />}<strong>{issue.title}</strong>{issue.value && <span className="numeric text-fail">{issue.value}</span>}</p>}
           {issue?.detail && <p>{issue.detail}</p>}
           {issue?.location && <p>異常箇所：{issue.location}</p>}
           {beforePhotos.length > 0 && <div className="repair-photos">{beforePhotos.map(photo => <figure key={photo.photoId}><img src={photo.url} alt={photo.photoType} /><figcaption>点検時：{photo.photoType}</figcaption></figure>)}</div>}
@@ -112,7 +112,7 @@ function WorkForm({ repair, site, inspection, target, photos, onUploadPhoto, onC
     <label className="form-row form-row-stack"><span>作業内容（必須）</span><textarea value={workNote} onChange={event => setWorkNote(event.target.value)} placeholder="例：アレイB 1段目5列目のモジュールを交換" data-testid="repair-work-note" /></label>
     <div className="form-row form-row-stack"><span>作業後の写真</span>
       {shownPhotos.length > 0 && <div className="repair-photos">{shownPhotos.map(photo => <figure key={photo.photoId}><img src={photo.url} alt={photo.photoType} /></figure>)}</div>}
-      <label className="button button-secondary file-button"><Camera />{photoIds.length ? '写真を追加' : '写真を選ぶ'}<input type="file" accept="image/*" capture="environment" data-testid="repair-photo" onChange={event => {
+      <label className="button button-secondary file-button"><Camera />{photoIds.length ? '写真を追加' : '写真を選ぶ'}<input className="file-input-accessible" aria-label="作業後の写真を追加" type="file" accept="image/*" capture="environment" data-testid="repair-photo" onChange={event => {
         const file = event.target.files?.[0]
         event.target.value = ''
         if (file) void onUploadPhoto(file, `作業後：${repair.title}`).then(photo => setPhotoIds(current => [...current, photo.photoId])).catch(reason => setError(reason instanceof Error ? reason.message : '写真を保存できませんでした'))

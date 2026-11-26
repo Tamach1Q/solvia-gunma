@@ -1,5 +1,5 @@
 export type Judgement = '適合' | '要確認' | '不適合' | '未入力'
-export type VisualResult = '○' | '×' | '該当なし' | null
+export type VisualResult = '○' | '△' | '×' | '該当なし' | null
 export type Weather = '晴れ' | '曇り' | '雨' | '雨上がり'
 
 export interface Site {
@@ -17,7 +17,7 @@ export interface Pcs { pcsId: string; maker: string; model: string; ratedKw: num
 export interface Circuit { circuitId: string; seriesCount: number; arrayId: string; rows: number[] }
 export interface ArrayLayout { arrayId: string; label: string; rows: number; cols: number }
 
-export type VisualCategory = 'アレイ・架台' | '接続箱' | 'PCS' | 'その他'
+export type VisualCategory = '敷地・周辺' | '太陽電池アレイ' | '架台・基礎' | '配線' | 'パワコン' | '監視装置・盤'
 export interface VisualItemDef { itemId: string; category: VisualCategory; title: string; criterion: string; icon: string }
 export interface VisualEntry { itemId: string; result: VisualResult; comment: string; photoIds: string[] }
 
@@ -40,6 +40,10 @@ export interface Inspection {
   inspector: string; weather?: Weather
   status: InspectionStatus
   visual: VisualEntry[]; measurements: MeasurementEntry[]; findings: Finding[]
+  reportFormat?: 'A' | 'B'
+  reportContractor?: string
+  reportCaseNo?: string
+  reportIssuedOn?: string
   reportText?: { summary: string; proposals: string[] }
   reportHeader?: { siteName: string; owner: string }
   // 報告書：掲載する写真と配置（zone=null は掲載しない）、ご提案文の選択肢
@@ -61,8 +65,9 @@ export interface RepairCase {
   workNote?: string; afterPhotoIds: string[]; remeasure?: MeasurementEntry
 }
 
-export type MonitoringLevel = '要対応' | '要確認' | '正常'
-export interface MonitoringStatus { siteId: string; outputKw: number; level: MonitoringLevel; alert: string | null; alertAt: string | null }
+export type SiteState = '異常停止中' | '経過観察' | '現状維持（オーナー意向）' | '修繕対応中' | '復旧済' | '管理外・解約済' | '正常'
+export type MonitoringDetection = { source: '監視アラーム' | '発電データ'; text: string; detectedAt: string; needsReview: boolean }
+export interface MonitoringStatus { siteId: string; outputKw: number; state?: SiteState; detection?: MonitoringDetection }
 
 export interface InspectionPhoto {
   photoId: string

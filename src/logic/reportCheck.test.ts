@@ -24,7 +24,7 @@ describe('報告書チェック', () => {
     expect(checkReport({ ...clean(), owner: ` ${siteOf(ownerReview).owner.replace(' ', '　')} ` }, siteOf(ownerReview))).toEqual([])
   })
   it('同じ発電所でも写真の点検項目が違えば指摘する', () => {
-    const review = { ...clean(), photos: ownerReview.photos.map(photo => ({ ...photo, inspectionItemId: 'JB-01' })) }
+    const review = { ...clean(), photos: ownerReview.photos.map(photo => ({ ...photo, inspectionItemId: '6-2' })) }
     expect(checkReport(review, siteOf(review))[0].title).toBe('写真と点検項目が一致しません')
   })
   it('写真の欠落・所見の空白・未入力の測定値を検出する', () => {
@@ -33,7 +33,7 @@ describe('報告書チェック', () => {
   })
   it('目視×に掲載写真がなければ指摘する', () => {
     const review = { ...clean(), attachments: [], inspection: { ...ownerReview.inspection, visual: ownerReview.inspection.visual.map((entry, index) => index ? entry : { ...entry, result: '×' as const }) } }
-    expect(checkReport(review, siteOf(review))[0].key).toBe('missing-photo:AR-01')
+    expect(checkReport(review, siteOf(review))[0].key).toBe('missing-photo:1-1')
   })
   it('承認には最新のチェック・担当者名・全体確認・指摘への対応が必要', async () => {
     const review = await checked(clean())

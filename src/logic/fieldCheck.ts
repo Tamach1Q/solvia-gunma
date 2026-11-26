@@ -13,9 +13,9 @@ export function missingItems(entries: Entries): MissingItem[] {
   for (const entry of entries.visual) {
     const title = visualItems.find(item => item.itemId === entry.itemId)?.title ?? entry.itemId
     if (!entry.result) missing.push({ step: 'visual', key: `visual:${entry.itemId}`, title, reason: '判定が入っていません' })
-    else if (entry.result === '×') {
-      if (!entry.comment.trim()) missing.push({ step: 'visual', key: `comment:${entry.itemId}`, title, reason: '×の内容（コメント）がありません' })
-      if (!entry.photoIds.length) missing.push({ step: 'visual', key: `photo:${entry.itemId}`, title, reason: '×なのに写真がありません' })
+    else if (entry.result === '×' || entry.result === '△') {
+      if (!entry.comment.trim()) missing.push({ step: 'visual', key: `comment:${entry.itemId}`, title, reason: `${entry.result}の内容（コメント）がありません` })
+      if (!entry.photoIds.length) missing.push({ step: 'visual', key: `photo:${entry.itemId}`, title, reason: `${entry.result}なのに写真がありません` })
     }
   }
   for (const entry of entries.measurements.filter(item => item.judgement === '未入力')) missing.push({ step: 'measure', key: `measure:${entry.key}`, title: measurementTitle(entry), reason: entry.raw ? '数値として読み取れません' : '測定値が入っていません' })

@@ -11,7 +11,7 @@ export function PhotoCapture({ label, photos, onCapture, testId }: { label: stri
     {photo?.url && <img src={photo.url} alt={label} />}
     <label className={`button ${photo ? 'button-secondary' : 'button-secondary is-required'} button-field`}>
       {photo ? <RefreshCcw /> : <Camera />}{busy ? '送信中…' : photo ? '撮り直す' : `${label}を撮影`}
-      <input type="file" accept="image/*" capture="environment" disabled={busy} data-testid={testId} onChange={event => {
+      <input className="file-input-accessible" aria-label={`${label}を撮影`} type="file" accept="image/*" capture="environment" disabled={busy} data-testid={testId} onChange={event => {
         const file = event.target.files?.[0]
         event.target.value = ''
         if (!file) return

@@ -1,0 +1,77 @@
+import { chromium } from 'playwright'
+import { mkdir } from 'node:fs/promises'
+const url = process.argv[2] || 'http://localhost:8888'
+const browser = await chromium.launch({ headless: true, ...(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {}) })
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+const checks = [], errors = []
+page.on('pageerror', error => errors.push(error.message))
+const assert = (ok, label) => { if (!ok) throw new Error(label); checks.push(label) }
+const fits = async () => assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${(await page.viewportSize()).width}px：ページの横はみ出しなし`)
+await mkdir('artifacts', { recursive: true })
+try {
+  await page.goto(url)
+  await page.getByTestId('login-email').fill('admin@backup-system.demo')
+  await page.getByTestId('login-password').fill('gunma1125')
+  await page.getByTestId('login-submit').click()
+  const rows = page.getByTestId('monitoring-row')
+  await rows.first().waitFor()
+  assert(await rows.count() === 8, '8発電所の一覧を表示')
+  assert(await rows.first().getAttribute('data-state') === '異常停止中', '異常のある発電所が先頭')
+  const rowHeight = (await rows.first().boundingBox()).height
+  assert(rowHeight < 100, `PCの行がコンパクト（${Math.round(rowHeight)}px）`)
+  await fits()
+  await page.screenshot({ path: 'artifacts/monitoring-list-desktop.png', fullPage: true })
+  await page.getByRole('button', { name: '異常停止中 1', exact: true }).click()
+  assert(await rows.count() === 1, '上部の異常停止中件数から絞り込み')
+  await page.getByRole('button', { name: 'すべて 8', exact: true }).click()
+  await page.getByRole('button', { name: '検知の確認待ち', exact: true }).click()
+  assert(await rows.count() === 1 && (await rows.first().innerText()).includes('発電データ'), '発電データの確認待ちだけを表示')
+  assert(await rows.first().getAttribute('data-state') === null, '確認待ちに運用状態を割り当てない')
+  await page.getByRole('button', { name: 'すべて 8', exact: true }).click()
+  await page.getByRole('combobox', { name: 'エリア', exact: true }).selectOption('渋川市')
+  await page.getByRole('combobox', { name: '監視システム', exact: true }).selectOption('新電元')
+  assert(await rows.count() === 1, 'エリアと監視システムを組み合わせて絞り込み')
+  await page.getByRole('searchbox', { name: '発電所を検索' }).fill('存在しない')
+  await page.getByRole('status').filter({ hasText: '該当する発電所がありません' }).waitFor()
+  await page.getByRole('button', { name: '条件をクリア', exact: true }).first().click()
+  assert(await rows.count() === 8, '0件から条件をクリアして復帰')
+  for (const width of [768, 390]) {
+    await page.setViewportSize({ width, height: 844 })
+    await fits()
+    await page.screenshot({ path: `artifacts/monitoring-list-${width}.png`, fullPage: true })
+  }
+  await page.setViewportSize({ width: 1440, height: 900 })
+  const target = rows.filter({ hasText: '渋川市 第2太陽光発電所' })
+  await target.getByRole('button', { name: '渋川市 第2太陽光発電所の操作', exact: true }).click()
+  assert((await target.getByRole('button', { name: '点検・報告書を開く' }).boundingBox()).width > 100, '操作を開いてもボタンが細い列に押し込まれない')
+  await target.getByRole('button', { name: '点検・報告書を開く' }).click()
+  await page.getByTestId('request-field').waitFor()
+  await page.goBack()
+  await rows.first().waitFor()
+  await rows.first().locator('.monitoring-site button').click()
+  await page.getByTestId('karte-screen').waitFor()
+  await page.goBack()
+  await rows.first().waitFor()
+  assert(true, '行末の操作から点検、発電所名からカルテへ遷移')
+  // MOCK: ページ切り替え検証のため、このブラウザ内だけ200件に増やす。
+  await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem('solvia_gunma_v1'))
+    const base = state.sites[0]
+    state.sites = [...state.sites, ...Array.from({ length: 192 }, (_, index) => ({ ...base, siteId: `QA-${index}`, name: `検証発電所${index + 1}`, area: index % 2 ? '前橋市' : '高崎市' }))]
+    localStorage.setItem('solvia_gunma_v1', JSON.stringify(state))
+  })
+  await page.reload()
+  await page.getByRole('status').filter({ hasText: '200件中 1〜25件' }).waitFor()
+  assert(await rows.count() === 25, '200件でも最初の25件だけ表示')
+  const firstPage = await rows.allTextContents()
+  await page.getByRole('button', { name: '次のページ', exact: true }).click()
+  await page.getByRole('status').filter({ hasText: '200件中 26〜50件' }).waitFor()
+  assert(await rows.count() === 25 && JSON.stringify(await rows.allTextContents()) !== JSON.stringify(firstPage), '次の25件に切り替え')
+  await page.getByRole('combobox', { name: '表示件数', exact: true }).selectOption('100')
+  assert(await rows.count() === 100, '表示件数変更で先頭に戻り100件表示')
+  await page.getByRole('searchbox', { name: '発電所を検索' }).fill('検証発電所192')
+  assert(await rows.count() === 1, '後方ページの発電所も全件から検索')
+  assert(await page.getByRole('button', { name: '次のページ', exact: true }).isDisabled(), '1件の結果では次ページを無効化')
+  assert(errors.length === 0, `実行時エラーなし：${errors.join(', ')}`)
+  console.log(`Monitoring list check passed（${checks.length}件）`)
+} finally { await browser.close() }

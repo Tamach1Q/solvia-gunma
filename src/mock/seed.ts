@@ -12,7 +12,7 @@ import { checkReport, reportFingerprint } from '../logic/reportCheck'
 export interface DemoState { version: 1; seedVersion: number; seededOn: string; sites: Site[]; inspections: Inspection[]; repairCases: RepairCase[]; photos: InspectionPhoto[]; reportReviews: ReportReview[] }
 
 // シードの中身（発電所構成・履歴・シナリオ）を変えたら上げる。保存データと食い違うとシードを作り直す。
-export const seedVersion = 9
+export const seedVersion = 10
 
 export const demoSiteId = 'S-03'
 export const inspectorName = '点検担当 A'
@@ -97,7 +97,7 @@ type InspectionSpec = { scheduledOn: string; status: InspectionStatus; overrides
 function buildInspection(site: Site, spec: InspectionSpec, previous?: Inspection): Inspection {
   const inspectionId = `INS-${site.siteId}-${spec.scheduledOn.replaceAll('-', '')}`
   const empty: Inspection = { inspectionId, siteId: site.siteId, scheduledOn: spec.scheduledOn, inspector: inspectorName, status: spec.status, visual: visualItems.map(item => ({ itemId: item.itemId, result: null, comment: '', photoIds: [] })), measurements: buildMeasurementEntries(site), findings: [] }
-  if (spec.status !== '完了') return empty
+  if (spec.status !== '完了') return { ...empty, measurements: [] }
   const random = seededRandom(inspectionId)
   const weather: Weather = random() < 0.7 ? '晴れ' : '曇り'
   const raws = sampleMeasurementRaws(site, random, spec.overrides)
@@ -148,9 +148,9 @@ function pastFindings(site: Site, yearsAgo: number): Pick<InspectionSpec, 'overr
   if (site.siteId === demoSiteId) {
     const overrides = { [measurementKey('DC絶縁抵抗', 'PCS-2', 'PCS-2/回路2')]: { 3: '25', 2: '18', 1: '12' }[yearsAgo] ?? '' }
     if (yearsAgo !== 1) return { overrides }
-    return { overrides, visual: { 'AR-07': { result: '×', comment: 'アレイB北側に雑草が伸び、下段モジュールに影がかかっている' } }, findings: [{ findingId: 'F-S03-WEEDS', source: 'visual', refKey: 'AR-07', arrayId: 'B', comment: 'アレイB北側の雑草（下段に影）', photoIds: [] }] }
+    return { overrides, visual: { '1-4': { result: '×', comment: 'アレイB北側に雑草が伸び、下段モジュールに影がかかっている' } }, findings: [{ findingId: 'F-S03-WEEDS', source: 'visual', refKey: '1-4', arrayId: 'B', comment: 'アレイB北側の雑草（下段に影）', photoIds: [] }] }
   }
-  if (site.siteId === 'S-07' && yearsAgo === 1) return { visual: { 'JB-05': { result: '×', comment: '接続箱2のSPD表示窓が赤色（劣化表示）' } }, findings: [{ findingId: 'F-S07-SPD', source: 'visual', refKey: 'JB-05', comment: '接続箱2のSPD劣化表示', photoIds: [] }] }
+  if (site.siteId === 'S-07' && yearsAgo === 1) return { visual: { '6-2': { result: '×', comment: '接続箱2のSPD表示窓が赤色（劣化表示）' } }, findings: [{ findingId: 'F-S07-SPD', source: 'visual', refKey: '6-2', comment: '接続箱2のSPD劣化表示', photoIds: [] }] }
   if (site.siteId === 'S-08' && yearsAgo === 1) return { overrides: { [measurementKey('DC絶縁抵抗', 'PCS-1', 'PCS-1/回路1')]: '1.1' } }
   return {}
 }

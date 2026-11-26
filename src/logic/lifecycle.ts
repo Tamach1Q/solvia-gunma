@@ -2,14 +2,13 @@ import { visualItems } from '../config/visualItems'
 import type { DemoState } from '../mock/seed'
 import type { Inspection, Site } from '../types'
 import { addYears } from './dates'
-import { buildMeasurementEntries } from './judge'
 import { createRepairCases } from './repairs'
 import { approvedInspectionReport } from './reportWorkflow'
 
 // 次回点検（点検日の1年後、未依頼）
 export function nextInspection(inspection: Inspection, site: Site): Inspection {
   const scheduledOn = addYears(inspection.inspectedOn ?? inspection.scheduledOn, 1)
-  return { inspectionId: `INS-${site.siteId}-${scheduledOn.replaceAll('-', '')}`, siteId: site.siteId, scheduledOn, inspector: inspection.inspector, status: '未依頼', visual: visualItems.map(item => ({ itemId: item.itemId, result: null, comment: '', photoIds: [] })), measurements: buildMeasurementEntries(site), findings: [] }
+  return { inspectionId: `INS-${site.siteId}-${scheduledOn.replaceAll('-', '')}`, siteId: site.siteId, scheduledOn, inspector: inspection.inspector, status: '未依頼', visual: visualItems.map(item => ({ itemId: item.itemId, result: null, comment: '', photoIds: [] })), measurements: [], findings: [] }
 }
 
 // 点検を完了する：ステータスを完了にし、修繕案件と1年後の予定を作る（SDD 4.6・4.7）。2回押しても重複しない。

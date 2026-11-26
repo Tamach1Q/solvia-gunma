@@ -1,3 +1,4 @@
+import { buildMeasurementEntries } from './judge'
 import { describe, expect, it } from 'vitest'
 import { createSeed, demoSiteId } from '../mock/seed'
 import { applyScenario, scenarioPhotos } from '../mock/scenario'
@@ -9,9 +10,9 @@ import { approveInspectionReport, approvedInspectionReport, editReportReview, re
 const now = new Date(2026, 9, 28, 14)
 const initial = createSeed(now)
 const site = initial.sites.find(item => item.siteId === demoSiteId)!
-const empty = initial.inspections.find(item => item.siteId === site.siteId && item.status === '未依頼')!
+const empty = { ...initial.inspections.find(item => item.siteId === site.siteId && item.status === '未依頼')!, measurements: buildMeasurementEntries(site) }
 const inspection = { ...applyScenario(empty, site), status: '報告書作成済み' as const, inspectedOn: '2026-10-28' }
-const draft = { ...initial, inspections: initial.inspections.map(item => item.inspectionId === inspection.inspectionId ? inspection : item), photos: [...initial.photos, ...scenarioPhotos(inspection.inspectionId)] }
+const draft = { ...initial, inspections: initial.inspections.map(item => item.inspectionId === inspection.inspectionId ? inspection : item), photos: [...initial.photos, ...scenarioPhotos(inspection.inspectionId, true)] }
 const reviewOf = (state: DemoState) => state.reportReviews.find(item => item.inspection.inspectionId === inspection.inspectionId)!
 const sourceOf = (state: DemoState) => state.inspections.find(item => item.inspectionId === inspection.inspectionId)!
 const submitted = () => submitInspectionReport(draft, inspection.inspectionId, now)
@@ -50,7 +51,7 @@ describe('点検と報告書チェックの連携', () => {
     const replacement = { ...original, photoId: 'PH-REPLACED' }
     const next = editReportReview(state, review.reviewId, { photos: [...review.photos, replacement], attachments: review.attachments.map(item => ({ ...item, photoId: replacement.photoId })) })
     expect(sourceOf(next).reportLayout?.map(item => item.photoId)).toContain(replacement.photoId)
-    expect(sourceOf(next).visual.find(item => item.itemId === 'AR-01')?.photoIds).toEqual([replacement.photoId])
+    expect(sourceOf(next).visual.find(item => item.itemId === '2-2')?.photoIds).toEqual([replacement.photoId])
     expect(sourceOf(next).findings.every(item => item.photoIds.includes(replacement.photoId))).toBe(true)
     expect(next.photos.find(item => item.photoId === replacement.photoId)).toEqual(replacement)
     expect(reviewMatchesInspection(reviewOf(next), sourceOf(next), site)).toBe(true)

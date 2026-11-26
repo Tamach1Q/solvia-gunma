@@ -1,3 +1,4 @@
+import { buildMeasurementEntries } from '../logic/judge'
 import { describe, expect, it } from 'vitest'
 import { measurementKey } from '../logic/judge'
 import { buildProposals } from '../logic/proposals'
@@ -63,7 +64,7 @@ describe('シードデータ', () => {
   })
   it('前回はアレイB周辺の雑草を指摘し、除草の修繕案件は完了済み', () => {
     const last = demoInspections.filter(inspection => inspection.status === '完了').at(-1)!
-    expect(last.visual.find(entry => entry.itemId === 'AR-07')!.result).toBe('×')
+    expect(last.visual.find(entry => entry.itemId === '1-4')!.result).toBe('×')
     expect(seed.repairCases.find(item => item.siteId === demoSiteId)).toMatchObject({ status: '完了', inspectionId: last.inspectionId, customerDecision: 'その他（作業実施）' })
   })
   it('全発電所に今月の点検がある。報告書チェック待ちは未完了で、完了済みの点検だけ1年後の予定がある', () => {
@@ -94,7 +95,7 @@ describe('シードデータ', () => {
 })
 
 describe('デモシナリオとご提案文', () => {
-  const current = demoInspections.at(-1)!
+  const current = { ...demoInspections.at(-1)!, measurements: buildMeasurementEntries(demoSite) }
   const previous = demoInspections.at(-2)!
   const filled = applyScenario(current, demoSite, previous)
 
@@ -105,9 +106,9 @@ describe('デモシナリオとご提案文', () => {
     expect(filled.measurements.filter(entry => entry.key !== dcKey).every(entry => entry.judgement === '適合')).toBe(true)
   })
   it('アレイB 1段目5列目のモジュール破損が目視×、他の目視は○', () => {
-    expect(filled.visual.filter(entry => entry.result === '×').map(entry => entry.itemId)).toEqual(['AR-01'])
+    expect(filled.visual.filter(entry => entry.result === '×').map(entry => entry.itemId)).toEqual(['2-2'])
     expect(filled.visual.every(entry => entry.result !== null)).toBe(true)
-    expect(filled.findings.find(finding => finding.refKey === 'AR-01')).toMatchObject({ arrayId: 'B', panels: [{ row: 1, col: 5 }], circuitId: 'PCS-2/回路2' })
+    expect(filled.findings.find(finding => finding.refKey === '2-2')).toMatchObject({ arrayId: 'B', panels: [{ row: 1, col: 5 }], circuitId: 'PCS-2/回路2' })
   })
   it('割れパネルはPCS-2 回路2が担当する段にある', () => {
     expect(circuitForPanel(demoSite, scenarioPanel.arrayId, scenarioPanel.row)?.circuitId).toBe(scenarioCircuitId)
