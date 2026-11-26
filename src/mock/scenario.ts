@@ -27,9 +27,11 @@ export function applyScenario(inspection: Inspection, site: Site, previous?: Pic
   const panels = [{ row: scenarioPanel.row, col: scenarioPanel.col }]
   const findings: Finding[] = [
     { findingId: `F-${inspection.inspectionId}-PANEL`, source: 'visual', refKey: '2-2', arrayId: scenarioPanel.arrayId, panels, circuitId: scenarioCircuitId, comment: 'モジュール表面ガラスの割れ（雨水が入りやすい状態）', photoIds: [photoId] },
-    { findingId: `F-${inspection.inspectionId}-INSULATION`, source: 'measurement', refKey: insulationKey, arrayId: scenarioPanel.arrayId, panels, circuitId: scenarioCircuitId, comment: '回路の切り分けで、割れたモジュールの系統に低下を確認', photoIds: [photoId] },
   ]
-  // 先に手入力された欄は残す（デモ当日、数値を2〜3個打ってもらってから残りを埋めるため）。筋書きの欄だけは上書きする。
-  const measurements = judgeMeasurements(inspection.measurements.map(entry => ({ ...entry, raw: entry.key === insulationKey ? raws[entry.key] : entry.raw || raws[entry.key] })), site, weather, previous?.measurements)
+  const target = inspection.measurements.find(entry => entry.key === insulationKey)
+  const measurements = judgeMeasurements(inspection.measurements.map(entry => ({ ...entry, raw: entry.raw.trim() ? entry.raw : raws[entry.key] })), site, weather, previous?.measurements)
+  if (target && !target.raw.trim() && !inspection.findings.some(finding => finding.refKey === insulationKey) && measurements.find(entry => entry.key === insulationKey)?.judgement === '不適合') {
+    findings.push({ findingId: `F-${inspection.inspectionId}-INSULATION`, source: 'measurement', refKey: insulationKey, arrayId: scenarioPanel.arrayId, panels, circuitId: scenarioCircuitId, comment: '回路の切り分けで、割れたモジュールの系統に低下を確認', photoIds: [photoId] })
+  }
   return { ...inspection, weather, visual, measurements, findings: [...inspection.findings.filter(finding => !findings.some(item => item.refKey === finding.refKey)), ...findings] }
 }

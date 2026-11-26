@@ -114,11 +114,13 @@ describe('デモシナリオとご提案文', () => {
     expect(circuitForPanel(demoSite, scenarioPanel.arrayId, scenarioPanel.row)?.circuitId).toBe(scenarioCircuitId)
     expect(scenarioCircuitId).toBe('PCS-2/回路2')
   })
-  it('手入力済みの欄は残し、筋書きの欄だけ上書きする', () => {
-    const typed = { ...current, measurements: current.measurements.map(entry => entry.key === '接地抵抗_架台' ? { ...entry, raw: '42' } : entry.key === dcKey ? { ...entry, raw: '95' } : entry) }
+  it.each([['0.35', '不適合'], ['85', '適合']])('手入力済みの絶縁抵抗 %sMΩ を残し、空欄だけ補完する', (raw, judgement) => {
+    const typed = { ...current, measurements: current.measurements.map(entry => entry.key === '接地抵抗_架台' ? { ...entry, raw: '42' } : entry.key === dcKey ? { ...entry, raw } : entry) }
     const result = applyScenario(typed, demoSite, previous)
     expect(result.measurements.find(entry => entry.key === '接地抵抗_架台')!.raw).toBe('42')
-    expect(result.measurements.find(entry => entry.key === dcKey)!.raw).toBe('0.3')
+    expect(result.measurements.find(entry => entry.key === dcKey)).toMatchObject({ raw, judgement })
+    expect(result.measurements.every(entry => entry.raw.trim())).toBe(true)
+    expect(result.findings.some(finding => finding.refKey === dcKey)).toBe(false)
   })
   it('ご提案文は割れと絶縁低下を1本にまとめる（交換→再測定）', () => {
     expect(buildProposals(filled, demoSite, previous)).toEqual([

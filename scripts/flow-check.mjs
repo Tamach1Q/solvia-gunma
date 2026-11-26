@@ -87,6 +87,16 @@ try {
   await page.getByRole('heading', { name: '点検予定', exact: true }).waitFor()
   await expectCount(page.getByTestId('schedule-row'), 8, '今月の点検')
   await expectCount(page.getByTestId('schedule-area'), 5, 'エリア')
+  for (const width of [1280, 1366, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 1000 })
+    const hiddenActions = await page.getByTestId('schedule-area').evaluateAll(areas => areas.some(area => {
+      const scroll = area.querySelector('.schedule-table-scroll')
+      const right = scroll.getBoundingClientRect().right
+      return scroll.scrollWidth > scroll.clientWidth + 1 || [...area.querySelectorAll('.schedule-actions button')].some(button => button.getBoundingClientRect().right > right + 1)
+    }))
+    if (hiddenActions) throw new Error(`${width}px：点検予定の操作列が初期表示に収まらない`)
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 })
   await page.screenshot({ path: 'artifacts/01-schedule.png', fullPage: true })
 
   step(2, '点検準備：前回値の推移から「今回の確認ポイント」が出ている')

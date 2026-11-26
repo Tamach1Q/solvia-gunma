@@ -271,13 +271,16 @@ img{display:block;max-width:100%}
 /* ---------- Schedule ---------- */
 .schedule-group+.schedule-group{margin-top:var(--space-4)}
 .schedule-group .data-table{table-layout:fixed}
-.schedule-group .data-table th:nth-child(1){width:9%}
-.schedule-group .data-table th:nth-child(2){width:25%}
-.schedule-group .data-table th:nth-child(3){width:8%}
-.schedule-group .data-table th:nth-child(4){width:12%}
-.schedule-group .data-table th:nth-child(5){width:12%}
-.schedule-group .data-table th:nth-child(6){width:14%}
-.schedule-group .data-table th:nth-child(7){width:20%}
+.schedule-current-table th:nth-child(1){width:8%}
+.schedule-current-table th:nth-child(2){width:22%}
+.schedule-current-table th:nth-child(3){width:7%}
+.schedule-current-table th:nth-child(4){width:11%}
+.schedule-current-table th:nth-child(5){width:10%}
+.schedule-current-table th:nth-child(6){width:13%}
+.schedule-current-table th:nth-child(7){width:15%}
+.schedule-current-table th:nth-child(8){width:14%}
+.schedule-current-table th,.schedule-current-table td{padding-inline:var(--space-3)}
+.schedule-current-table td{overflow-wrap:anywhere}
 .data-table td.is-highlighted .measurement-value{color:var(--caution);font-weight:700}
 
 /* ---------- Prep ---------- */

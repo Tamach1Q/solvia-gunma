@@ -39,7 +39,7 @@ export function ScheduleScreen({ sites, inspections, reviews, onOpenReview, onOp
       </section>
       {groups.map(group => <section className="panel schedule-group" key={group.area} data-testid="schedule-area">
         <header className="panel-header"><h2>{group.area}</h2><span className="panel-count">{group.dates.map(date => formatShortDate(date, today)).join('・')}</span><span className="panel-count">{group.items.length}件</span></header>
-        <div className="schedule-table-scroll"><table className="data-table mobile-record-table">
+        <div className="schedule-table-scroll"><table className="data-table mobile-record-table schedule-current-table">
           <thead><tr><th>点検日</th><th>発電所</th><th className="numeric">容量</th><th>前回点検</th><th>前回の指摘</th><th>点検の状態</th><th>報告書チェック</th><th>操作</th></tr></thead>
           <tbody>{group.items.map(({ inspection, site, previous }) => {
             const findings = findingCount(previous)
