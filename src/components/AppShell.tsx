@@ -5,16 +5,16 @@ import { formatDateWithWeekday } from '../logic/format'
 import type { Session } from '../services/session'
 import { FeedbackButton } from './Feedback'
 
-export type AdminView = 'monitoring' | 'schedule' | 'prep' | 'photos' | 'report' | 'repairs' | 'repair' | 'karte' | 'reportChecks' | 'reportCheck' | 'checkedReport'
+export type AdminView = 'monitoring' | 'incidents' | 'incident' | 'schedule' | 'prep' | 'photos' | 'report' | 'repairs' | 'repair' | 'karte' | 'reportChecks' | 'reportCheck' | 'checkedReport'
 
 const navSections: { label: string; items: { view: AdminView; label: string; icon: ReactNode }[] }[] = [
-  { label: '運用管理', items: [{ view: 'monitoring', label: '統合監視', icon: <Activity size={18} /> }] },
+  { label: '運用管理', items: [{ view: 'monitoring', label: '統合監視', icon: <Activity size={18} /> }, { view: 'incidents', label: '不具合対応台帳', icon: <ClipboardCheck size={18} /> }] },
   { label: '点検業務', items: [{ view: 'schedule', label: '点検予定', icon: <ClipboardCheck size={18} /> }, { view: 'reportChecks', label: '報告書チェック', icon: <FileSearch size={18} /> }, { view: 'repairs', label: '修繕案件', icon: <Wrench size={18} /> }, { view: 'karte', label: '発電所カルテ', icon: <FolderOpen size={18} /> }] },
 ]
 
-const titles: Record<AdminView, string> = { monitoring: '統合監視', schedule: '点検予定', prep: '点検準備', photos: '写真確認', report: '点検報告書', repairs: '修繕案件', repair: '修繕案件の詳細', karte: '発電所カルテ', reportChecks: '報告書チェック', reportCheck: '報告書の確認', checkedReport: '提出された報告書' }
+const titles: Record<AdminView, string> = { monitoring: '統合監視', incidents: '不具合対応台帳', incident: '不具合対応詳細', schedule: '点検予定', prep: '点検準備', photos: '写真確認', report: '点検報告書', repairs: '修繕案件', repair: '修繕案件の詳細', karte: '発電所カルテ', reportChecks: '報告書チェック', reportCheck: '報告書の確認', checkedReport: '提出された報告書' }
 // 下の階層の画面は、ナビゲーションでは親の画面を現在地にする
-const navOf: Record<AdminView, AdminView> = { monitoring: 'monitoring', schedule: 'schedule', prep: 'schedule', photos: 'schedule', report: 'schedule', repairs: 'repairs', repair: 'repairs', karte: 'karte', reportChecks: 'reportChecks', reportCheck: 'reportChecks', checkedReport: 'reportChecks' }
+const navOf: Record<AdminView, AdminView> = { monitoring: 'monitoring', incidents: 'incidents', incident: 'incidents', schedule: 'schedule', prep: 'schedule', photos: 'schedule', report: 'schedule', repairs: 'repairs', repair: 'repairs', karte: 'karte', reportChecks: 'reportChecks', reportCheck: 'reportChecks', checkedReport: 'reportChecks' }
 
 export function AppShell({ view, onNavigate, session, onSignOut, children }: { view: AdminView; onNavigate: (view: AdminView) => void; session: Session; onSignOut: () => void; children: ReactNode }) {
   return <div className="app-shell">

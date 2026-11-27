@@ -8,7 +8,7 @@ const stateOrder: SiteState[] = ['要対応', '要確認', '修繕対応中', '�
 const stateTone: Record<SiteState, string> = { 要対応: 'red', 要確認: 'amber', 修繕対応中: 'blue', 正常: 'green' }
 const areaOrder = ['渋川市', '前橋市', '高崎市', '伊勢崎市', '沼田市']
 
-export function MonitoringScreen({ sites, inspections, repairCases, onOpenKarte }: { sites: Site[]; inspections: Inspection[]; repairCases: RepairCase[]; onOpenKarte: (siteId: string) => void }) {
+export function MonitoringScreen({ sites, inspections, repairCases, onOpenKarte, onRegisterIncident }: { sites: Site[]; inspections: Inspection[]; repairCases: RepairCase[]; onOpenKarte: (siteId: string) => void; onRegisterIncident: (monitor: import('../types').MonitoringStatus) => void }) {
   const now = useMemo(() => new Date(), [])
   const rows = useMemo(() => {
     const snapshot = monitoringSnapshot(sites, now)
@@ -40,7 +40,7 @@ export function MonitoringScreen({ sites, inspections, repairCases, onOpenKarte 
         <div className="monitoring-output"><span>現在出力 / 容量</span><strong>{formatNumber(monitor.outputKw, 1)} / {formatQuantity(site.capacityKw, 'kW', 1)}</strong></div>
         <div className="monitoring-alert">{monitor.alert ? <><span className={state === '要対応' ? 'text-fail' : ''}>{monitor.alert}</span><small>{formatTime(monitor.alertAt!)} 受信</small></> : openRepair ? <><span>{openRepair.title}</span><small>修繕：{openRepair.status}</small></> : <span className="text-muted">アラームなし</span>}</div>
         <p className="monitoring-next">次回点検：{next ? <>{formatShortDate(next.scheduledOn, now)} · {next.status}</> : '予定なし'}</p>
-        <button className="button button-secondary" onClick={() => onOpenKarte(site.siteId)}>発電所カルテ</button>
+        {monitor.alert && <button className="button button-primary" onClick={() => onRegisterIncident(monitor)}>不具合対応台帳へ</button>}<button className="button button-secondary" onClick={() => onOpenKarte(site.siteId)}>発電所カルテ</button>
       </article>)}</div>
       {!visible.length && <div className="panel empty-state" role="status">該当する発電所がありません。検索条件を変更してください。</div>}
     </section>

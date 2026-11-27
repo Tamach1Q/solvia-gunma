@@ -23,7 +23,7 @@ export function completeInspection(state: DemoState, inspectionId: string, today
   const hasRepairs = state.repairCases.some(item => item.inspectionId === inspectionId)
   return {
     ...state,
-    inspections: [...state.inspections.map(item => item.inspectionId === inspectionId ? done : item), ...(hasNext ? [] : [next])],
+    inspections: [...state.inspections.map(item => item.inspectionId === inspectionId ? done : item), ...(hasNext || inspection.kind === '駆けつけ点検' ? [] : [next])],
     repairCases: [...state.repairCases, ...(hasRepairs ? [] : createRepairCases(done, site))],
   }
 }

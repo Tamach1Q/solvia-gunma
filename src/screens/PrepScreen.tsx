@@ -34,7 +34,7 @@ export function PrepScreen({ site, inspection, previous, checkpoints, localMode,
   return <div className="page" data-testid="prep-screen">
     <button className="back-button" onClick={onBack}><ArrowLeft />点検予定へ戻る</button>
     <div className="page-heading">
-      <div><h1>{site.name}</h1><p>{site.address}・{formatDateWithWeekday(inspection.scheduledOn)}・{inspection.inspector}</p></div>
+      <div><h1>{site.name}</h1><p>{site.address}・{inspection.kind === '駆けつけ点検' ? '駆けつけ点検・' : ''}{formatDateWithWeekday(inspection.scheduledOn)}・{inspection.inspector}</p></div>
       <div className="heading-actions"><InspectionStatusChip status={inspection.status} />{inspection.status !== '完了' && <button className={`button ${requested ? 'button-secondary' : 'button-primary'}`} onClick={onRequest} data-testid="request-field"><Send />{localMode ? '現場入力を開く' : requested ? '依頼状況を見る' : '現場に依頼'}</button>}{submittedStatuses.includes(inspection.status) && <button className="button button-primary" onClick={onReport} data-testid="to-report"><FileText />{inspection.status === '提出済み' ? '写真を確認して報告書へ' : '報告書を開く'}</button>}</div>
     </div>
 

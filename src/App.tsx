@@ -10,6 +10,8 @@ import { buildProposals } from './logic/proposals'
 import { buildReportText, defaultReportLayout, inspectionPhotos } from './logic/report'
 import { advanceStatus } from './logic/status'
 import { approvedInspectionReport, approveInspectionReport, editReportReview, inspectionFromReview, reportProgress, returnInspectionReport, storeReportCheck, submitInspectionReport } from './logic/reportWorkflow'
+import { IncidentListScreen, IncidentDetailScreen } from './screens/IncidentScreens'
+import { addIncidentLog, alarmKey, existingAlarm, scheduleIncident } from './logic/incidents'
 import { MonitoringScreen } from './screens/MonitoringScreen'
 import { PhotoReviewScreen } from './screens/PhotoReviewScreen'
 import { PrepScreen } from './screens/PrepScreen'
@@ -25,7 +27,7 @@ import { LoginScreen } from './screens/LoginScreen'
 import { loadSession, signOut, type Session } from './services/session'
 import { SharedField } from './screens/field/SharedField'
 import { isConnectionError, resizeImage, sharedInspectionService, type FieldContext, type SharedInspection } from './services/sharedInspectionService'
-import type { Inspection, InspectionPhoto, RepairCase, ReportCheckIssue, ReportReview } from './types'
+import type { Incident, IncidentSource, IncidentLogKind, MonitoringStatus, Inspection, InspectionPhoto, RepairCase, ReportCheckIssue, ReportReview } from './types'
 
 // offline：Functionsに繋がらない。同じ端末での現場入力を案内する
 type ShareState = { open: boolean; shared: SharedInspection | null; loading: boolean; error: string; offline: boolean }
@@ -53,6 +55,7 @@ function Admin({ session, onSignOut }: { session: Session; onSignOut: () => void
   const [photoWork, setPhotoWork] = useState({ busy: false, error: '' })
   const [karteSiteId, setKarteSiteId] = useState<string | null>(null)
   const [repairId, setRepairId] = useState<string | null>(null)
+  const [incidentId, setIncidentId] = useState<string | null>(null)
   const [reviewId, setReviewId] = useState<string | null>(null)
   const [reviewWork, setReviewWork] = useState({ reviewId: '', busy: false, error: '' })
   useEffect(() => saveState(state), [state])
@@ -63,7 +66,7 @@ function Admin({ session, onSignOut }: { session: Session; onSignOut: () => void
   const sourceProgress = selected && site ? reportProgress(selected, site, sourceReview) : null
   const canComplete = Boolean(selected && approvedInspectionReport(state, selected.inspectionId))
   const history = useMemo(() => selected ? pastInspections(state.inspections, selected) : [], [state.inspections, selected])
-  const checkpoints = useMemo(() => site ? buildCheckpoints(site, history, state.repairCases) : [], [site, history, state.repairCases])
+  const checkpoints = useMemo(() => site ? [...(selected?.investigationNote ? [{ key: 'incident:' + selected.inspectionId, kind: 'incident' as const, target: '駆けつけ点検', label: '重点確認・申し送り', reason: selected.investigationNote }] : []), ...buildCheckpoints(site, history, state.repairCases)] : [], [site, selected, history, state.repairCases])
   const fieldContext = useMemo<FieldContext | null>(() => site && selected ? { site, checkpoints, previousMeasurements: history.at(-1)?.measurements ?? [], scheduledOn: selected.scheduledOn, inspector: selected.inspector } : null, [site, selected, checkpoints, history])
 
   const updateInspection = (inspectionId: string, update: (inspection: Inspection) => Inspection) => setState(current => ({ ...current, inspections: current.inspections.map(inspection => inspection.inspectionId === inspectionId ? update(inspection) : inspection) }))
@@ -104,7 +107,7 @@ function Admin({ session, onSignOut }: { session: Session; onSignOut: () => void
       const shared = await sharedInspectionService.create(token, {
         inspectionId: selected.inspectionId, siteId: site.siteId, visual: selected.visual, measurements: selected.measurements,
         context: fieldContext,
-        plantName: site.name, address: site.address, requestTitle: '定期点検',
+        plantName: site.name, address: site.address, requestTitle: selected.kind ?? '定期点検',
       })
       updateInspection(selected.inspectionId, inspection => ({ ...inspection, shareToken: token, status: advanceStatus(inspection.status === '未依頼' ? '依頼済み' : inspection.status, shared.status) }))
       setShare({ ...closedShare, open: true, shared })
@@ -185,11 +188,34 @@ function Admin({ session, onSignOut }: { session: Session; onSignOut: () => void
 
   // 点検を完了する：修繕案件の自動作成と1年後の予定まで（SDD 4.6・4.7）
   const completeInspection = () => {
-    if (!selected || !approvedInspectionReport(state, selected.inspectionId) || !window.confirm('承認済みの報告書で点検を完了し、修繕案件と1年後の点検予定を作成します。よろしいですか？')) return
+    if (!selected || !approvedInspectionReport(state, selected.inspectionId) || !window.confirm(selected.kind === '駆けつけ点検' ? '承認済みの報告書で駆けつけ点検を完了し、必要な修繕案件を作成します。よろしいですか？' : '承認済みの報告書で点検を完了し、修繕案件と1年後の点検予定を作成します。よろしいですか？')) return
     setState(current => completeInspectionState(current, selected.inspectionId, toDateString(new Date())))
   }
 
   const go = (next: AdminView) => { setView(next); window.scrollTo(0, 0) }
+  const incidents = state.incidents ?? []
+  const incident = incidents.find(item => item.id === incidentId)
+  const incidentSite = incident && state.sites.find(item => item.siteId === incident.siteId)
+  const openIncident = (id: string) => { setIncidentId(id); go('incident') }
+  const createIncident = (siteId: string, title: string, source: IncidentSource, monitor?: MonitoringStatus) => {
+    const existing = monitor && existingAlarm(incidents, monitor)
+    if (existing) return openIncident(existing.id)
+    const at = new Date().toISOString()
+    const id = 'INC-' + crypto.randomUUID()
+    const item: Incident = { id, siteId, title, source, occurredAt: monitor?.alertAt ?? at, assignee: '', dueOn: '', decision: '未判断', reason: '', logs: [{ id: 'LOG-' + crypto.randomUUID(), at, kind: '登録', by: session.name, text: title }], ...(monitor ? { alarmKey: alarmKey(monitor) } : {}) }
+    setState(current => ({ ...current, incidents: [...(current.incidents ?? []), item] }))
+    openIncident(id)
+  }
+  const updateIncident = (patch: Partial<Incident>) => setState(current => ({ ...current, incidents: (current.incidents ?? []).map(item => item.id === incidentId ? { ...item, ...patch } : item) }))
+  const recordIncident = (kind: IncidentLogKind, text: string, patch: Partial<Incident> = {}) => {
+    const at = new Date().toISOString(), id = 'LOG-' + crypto.randomUUID()
+    setState(current => ({ ...current, incidents: (current.incidents ?? []).map(item => item.id === incidentId ? addIncidentLog({ ...item, ...patch }, kind, text, session.name, at, id) : item) }))
+  }
+  const scheduleVisit = (date: string, inspector: string, note: string) => {
+    if (!incidentId) return
+    const id = 'INS-' + crypto.randomUUID(), at = new Date().toISOString()
+    setState(current => scheduleIncident(current, incidentId, date, inspector.trim(), note.trim(), id, at, session.name))
+  }
   const openKarte = (siteId: string) => { setKarteSiteId(siteId); go('karte') }
   const openRepair = (caseId: string) => { setRepairId(caseId); go('repair') }
   const openReview = (id: string) => { setReviewId(id); go('reportCheck') }
@@ -242,12 +268,13 @@ function Admin({ session, onSignOut }: { session: Session; onSignOut: () => void
   }
 
   const resetData = () => {
-    if (!window.confirm('点検予定・点検結果・修繕案件・報告書チェックを初期状態に戻します。よろしいですか？')) return
+    if (!window.confirm('点検予定・点検結果・修繕案件・報告書チェック・不具合対応台帳を初期状態に戻します。よろしいですか？')) return
     setState(resetState())
     setSelectedId(null)
     setShare(closedShare)
     setLocalField(false)
     setRepairId(null)
+    setIncidentId(null)
     setKarteSiteId(null)
     setReviewId(null)
     setView('schedule')
@@ -261,7 +288,9 @@ function Admin({ session, onSignOut }: { session: Session; onSignOut: () => void
   }
 
   return <AppShell view={view} onNavigate={go} session={session} onSignOut={onSignOut}>
-    {view === 'monitoring' && <MonitoringScreen sites={state.sites} inspections={state.inspections} repairCases={state.repairCases} onOpenKarte={openKarte} />}
+    {view === 'monitoring' && <MonitoringScreen sites={state.sites} inspections={state.inspections} repairCases={state.repairCases} onOpenKarte={openKarte} onRegisterIncident={monitor => monitor.alert && createIncident(monitor.siteId, monitor.alert, '遠隔監視', monitor)} />}
+    {view === 'incidents' && <IncidentListScreen sites={state.sites} inspections={state.inspections} repairCases={state.repairCases} incidents={incidents} onOpen={openIncident} onOpenRepair={openRepair} onCreate={createIncident} />}
+    {view === 'incident' && incident && incidentSite && <IncidentDetailScreen key={incident.id} incident={incident} site={incidentSite} inspections={state.inspections} repairCases={state.repairCases} onUpdate={updateIncident} onLog={recordIncident} onSchedule={scheduleVisit} onOpenInspection={openPrep} onOpenRepair={openRepair} onBack={() => go('incidents')} onOpenKarte={() => openKarte(incident.siteId)} />}
     {view === 'schedule' && <ScheduleScreen sites={state.sites} inspections={state.inspections} reviews={state.reportReviews} onOpenReview={openReview} onOpen={openPrep} onReset={resetData} />}
     {view === 'prep' && selected && site && <PrepScreen site={site} inspection={selected} review={sourceReview} progress={sourceProgress} onReview={() => sourceReview && openReview(sourceReview.reviewId)} previous={history.at(-1)} checkpoints={checkpoints} localMode={Boolean(selected.localField)} onBack={() => { setLocalField(false); setView('schedule') }} onRequest={() => void requestField()} onReport={openReportFlow} />}
     {view === 'photos' && selected && <PhotoReviewScreen photos={inspectionPhotos(selected, state.photos)} includedIds={(selected.reportLayout ?? []).map(entry => entry.photoId)} syncing={photoWork.busy} error={photoWork.error} onIncludedChange={setIncludedPhotos} onReplace={(photo, file) => void replacePhoto(photo, file)} onBack={() => setView('prep')} onConfirm={openReport} />}
@@ -273,7 +302,7 @@ function Admin({ session, onSignOut }: { session: Session; onSignOut: () => void
       backLabel={sourceProgress === 'チェック待ち' || sourceProgress === '承認済み' || selected.status === '完了' ? '点検準備へ戻る' : undefined} onComplete={completeInspection} onSubmitForCheck={submitForReview}
       review={sourceReview} progress={sourceProgress} canComplete={canComplete} onOpenSchedule={() => go('schedule')}
       createdRepairs={state.repairCases.filter(item => item.inspectionId === selected.inspectionId).length}
-      nextScheduledOn={selected.status === '完了' ? state.inspections.filter(item => item.siteId === selected.siteId && item.scheduledOn > selected.scheduledOn).sort((a, b) => a.scheduledOn.localeCompare(b.scheduledOn))[0]?.scheduledOn : undefined}
+      nextScheduledOn={selected.status === '完了' && selected.kind !== '駆けつけ点検' ? state.inspections.filter(item => item.siteId === selected.siteId && item.scheduledOn > selected.scheduledOn).sort((a, b) => a.scheduledOn.localeCompare(b.scheduledOn))[0]?.scheduledOn : undefined}
       onOpenRepairs={() => go('repairs')} onOpenKarte={() => openKarte(selected.siteId)} />}
     {view === 'reportChecks' && <ReportCheckListScreen reviews={state.reportReviews} onOpen={openReview} />}
     {view === 'reportCheck' && review && reviewSite && <ReportCheckDetailScreen key={review.reviewId} review={review} site={reviewSite} sites={state.sites} busy={reviewWork.reviewId === review.reviewId && reviewWork.busy} error={reviewWork.reviewId === review.reviewId ? reviewWork.error : ''}

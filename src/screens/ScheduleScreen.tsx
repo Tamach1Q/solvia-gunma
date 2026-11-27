@@ -14,7 +14,7 @@ export function ScheduleScreen({ sites, inspections, reviews, onOpenReview, onOp
   const today = useMemo(() => new Date(), [])
   const groups = useMemo(() => {
     const month = toDateString(today).slice(0, 7)
-    const rows: Row[] = inspections.filter(inspection => inspection.scheduledOn.startsWith(month)).map(inspection => ({ inspection, site: sites.find(site => site.siteId === inspection.siteId)!, previous: previousInspection(inspections, inspection) }))
+    const rows: Row[] = inspections.filter(inspection => inspection.scheduledOn.startsWith(month) || (inspection.scheduledOn < month && inspection.status !== '完了')).map(inspection => ({ inspection, site: sites.find(site => site.siteId === inspection.siteId)!, previous: previousInspection(inspections, inspection) }))
     const byArea = new Map<Area, Row[]>()
     for (const row of [...rows].sort((a, b) => a.inspection.scheduledOn.localeCompare(b.inspection.scheduledOn) || a.site.name.localeCompare(b.site.name, 'ja'))) byArea.set(row.site.area, [...(byArea.get(row.site.area) ?? []), row])
     return [...byArea.entries()].map(([area, items]) => ({ area, items, dates: [...new Set(items.map(item => item.inspection.scheduledOn))] }))
@@ -28,8 +28,8 @@ export function ScheduleScreen({ sites, inspections, reviews, onOpenReview, onOp
   const count = (statuses: Inspection['status'][]) => all.filter(row => statuses.includes(row.inspection.status)).length
 
   return <div className="page" data-testid="schedule-screen">
-    <div className="page-heading"><div><h1>点検予定</h1><p>{formatMonth(today)}時点の定期点検をエリアごとに確認します。</p></div><button className="button button-secondary" onClick={onReset} data-testid="reset-data"><RotateCcw />初期状態に戻す</button></div>
-    {all.length ? <>
+    <div className="page-heading"><div><h1>点検予定</h1><p>{formatMonth(today)}時点の定期・駆けつけ点検をエリアごとに確認します。</p></div><button className="button button-secondary" onClick={onReset} data-testid="reset-data"><RotateCcw />初期状態に戻す</button></div>
+    {all.length || upcoming.length ? <>
       <section className="summary-strip schedule-summary" aria-label="今月の点検の状況">
         <div><span>今月の点検</span><strong>{all.length}</strong></div>
         <div><span>未依頼</span><strong>{count(['未依頼'])}</strong></div>
@@ -47,7 +47,7 @@ export function ScheduleScreen({ sites, inspections, reviews, onOpenReview, onOp
             const progress = reportProgress(inspection, site, review)
             return <tr key={inspection.inspectionId} data-testid="schedule-row">
               <td className="numeric-cell">{formatShortDate(inspection.scheduledOn, today)}</td>
-              <td><button className="link-button" onClick={() => onOpen(inspection.inspectionId)} data-testid={`open-${site.siteId}`}>{site.name}</button><small>{site.address.replace('群馬県', '')}</small></td>
+              <td><button className="link-button" onClick={() => onOpen(inspection.inspectionId)} data-testid={`open-${site.siteId}`}>{site.name}</button><small>{inspection.kind === '駆けつけ点検' ? '駆けつけ点検 · ' : ''}{site.address.replace('群馬県', '')}</small></td>
               <td className="numeric">{formatQuantity(site.capacityKw, 'kW', 1)}</td>
               <td className="numeric-cell">{previous ? formatShortDate(previous.inspectedOn ?? previous.scheduledOn, today) : <span className="text-muted">初回</span>}</td>
               <td>{findings ? <span className="text-caution">あり（{findings}件）</span> : <span className="text-muted">なし</span>}</td>
@@ -65,7 +65,7 @@ export function ScheduleScreen({ sites, inspections, reviews, onOpenReview, onOp
             const previous = previousInspection(inspections, inspection)
             return <tr key={inspection.inspectionId} data-testid="upcoming-row">
               <td className="numeric-cell">{formatShortDate(inspection.scheduledOn, today)}</td>
-              <td><button className="link-button" onClick={() => onOpen(inspection.inspectionId)}>{site.name}</button></td>
+              <td><button className="link-button" onClick={() => onOpen(inspection.inspectionId)}>{site.name}</button>{inspection.kind === '駆けつけ点検' && <small>駆けつけ点検</small>}</td>
               <td className="numeric">{formatQuantity(site.capacityKw, 'kW', 1)}</td>
               <td>{site.area}</td>
               <td className="numeric-cell">{previous ? formatShortDate(previous.inspectedOn ?? previous.scheduledOn, today) : '—'}</td>
@@ -74,6 +74,6 @@ export function ScheduleScreen({ sites, inspections, reviews, onOpenReview, onOp
           })}</tbody>
         </table></div>
       </section>}
-    </> : <section className="panel empty-state" data-testid="schedule-empty"><ClipboardCheck size={28} /><strong>今月の点検予定はありません</strong><span>点検が完了すると、1年後の予定がここに追加されます。</span></section>}
+    </> : <section className="panel empty-state" data-testid="schedule-empty"><ClipboardCheck size={28} /><strong>今月の点検予定はありません</strong><span>来月以降の予定は台帳からも確認できます。</span></section>}
   </div>
 }

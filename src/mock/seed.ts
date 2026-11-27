@@ -9,7 +9,7 @@ import { syncReportReview } from '../logic/reportWorkflow'
 import { checkReport, reportFingerprint } from '../logic/reportCheck'
 
 // photos：同じ端末で現場入力したときの写真（共有URLモードの写真はNetlify Blobsに保存する）
-export interface DemoState { version: 1; seedVersion: number; seededOn: string; sites: Site[]; inspections: Inspection[]; repairCases: RepairCase[]; photos: InspectionPhoto[]; reportReviews: ReportReview[] }
+export interface DemoState { incidents?: import('../types').Incident[]; version: 1; seedVersion: number; seededOn: string; sites: Site[]; inspections: Inspection[]; repairCases: RepairCase[]; photos: InspectionPhoto[]; reportReviews: ReportReview[] }
 
 // シードの中身（発電所構成・履歴・シナリオ）を変えたら上げる。保存データと食い違うとシードを作り直す。
 export const seedVersion = 9

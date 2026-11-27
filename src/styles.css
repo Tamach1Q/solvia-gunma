@@ -873,3 +873,5 @@ button:disabled{cursor:not-allowed}
 .report-rating-unit input{width:96px;font-variant-numeric:tabular-nums}
 @media (max-width:760px){.account-menu,.feedback-open{margin-left:0}.account-menu{flex-wrap:wrap}}
 @media print{.feedback-open,.report-rating{display:none}}
+
+.incident-log{display:grid;gap:var(--space-1);padding:var(--space-3) 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.incident-log p{white-space:pre-wrap}.incident-log:last-child{border-bottom:0}

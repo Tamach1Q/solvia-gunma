@@ -69,7 +69,7 @@ export function ReportScreen({ site, inspection, previous, photos, onChange, onR
       <article className="report-document" data-testid="report-document">
         <section className="report-cover">
           <p className="report-issuer">{brand.companyName}</p>
-          <h1>太陽光発電設備 定期点検報告書</h1>
+          <h1>太陽光発電設備 {inspection.kind ?? '定期点検'}報告書</h1>
           {editing && !locked ? <div className="report-header-editor"><label className="review-input"><span>報告書の発電所名</span><input value={header.siteName} onChange={event => onChange({ reportHeader: { ...header, siteName: event.target.value } })} /></label><label className="review-input"><span>報告書のオーナー名</span><input value={header.owner} onChange={event => onChange({ reportHeader: { ...header, owner: event.target.value } })} /></label></div> : <><p className="report-site">{header.siteName}</p><p className="report-owner">{header.owner} 様</p></>}
           <dl className="report-facts">
             <div><dt>点検日</dt><dd>{formatDateWithWeekday(inspection.inspectedOn ?? inspection.scheduledOn)}</dd></div>

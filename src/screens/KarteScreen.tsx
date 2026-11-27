@@ -80,7 +80,7 @@ export function KarteScreen({ sites, site, inspections, repairCases, onSelectSit
           <span className="numeric">{formatDate(dateOf(inspection))}</span>
           <InspectionStatusChip status={inspection.status} />
           <span className="text-muted">{recordedStatuses.includes(inspection.status) ? `${inspection.weather ?? ''}・指摘${findingCount(inspection)}件` : '予定'}</span>
-          <button className="link-button" onClick={() => onOpenInspection(inspection.inspectionId)}>開く</button>
+          {inspection.kind === '駆けつけ点検' && <small>駆けつけ点検</small>}<button className="link-button" onClick={() => onOpenInspection(inspection.inspectionId)}>開く</button>
         </li>)}</ul>
       </section>
       <section className="panel">

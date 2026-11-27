@@ -5,7 +5,7 @@ import { formatDate, formatNumber } from './format'
 import { circuitOpenVoltage, dcInsulationMin, parseMeasurement } from './judge'
 import { measurementTitle } from './labels'
 
-export type CheckpointKind = 'trend' | 'nearThreshold' | 'previousFinding' | 'openRepair'
+export type CheckpointKind = 'trend' | 'nearThreshold' | 'previousFinding' | 'openRepair' | 'incident'
 export interface Checkpoint { key: string; kind: CheckpointKind; target: string; label: string; reason: string; refKey?: string }
 
 const finiteValue = (raw: string | undefined) => {

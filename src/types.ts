@@ -37,6 +37,7 @@ export interface Finding {
 export type InspectionStatus = '未依頼' | '依頼済み' | '点検中' | '提出済み' | '報告書作成済み' | '完了'
 export interface Inspection {
   inspectionId: string; siteId: string; scheduledOn: string; inspectedOn?: string
+  kind?: '定期点検' | '駆けつけ点検'; incidentId?: string; investigationNote?: string
   inspector: string; weather?: Weather
   status: InspectionStatus
   visual: VisualEntry[]; measurements: MeasurementEntry[]; findings: Finding[]
@@ -88,4 +89,15 @@ export interface ReportReview {
   check?: { fingerprint: string; checkedAt: string; issues: ReportCheckIssue[] }
   confirmations: Record<string, { fingerprint: string; note: string }>
   reviewedBy?: string; reviewedAt?: string; returnNote?: string
+}
+
+export type IncidentSource = '遠隔監視' | '定期点検' | 'オーナー連絡' | 'その他'
+export type IncidentDecision = '未判断' | '経過観察' | '駆けつけ' | '遠隔対応' | '現状維持' | '対応不要'
+export type IncidentLogKind = '登録' | '判断' | '電話' | 'メール' | '作業' | '復旧' | '完了' | '再開' | 'メモ'
+export interface IncidentLog { id: string; kind: IncidentLogKind; at: string; by: string; text: string }
+export interface Incident {
+  id: string; siteId: string; title: string; source: IncidentSource; occurredAt: string
+  assignee: string; dueOn: string; decision: IncidentDecision; reason: string
+  recoveredAt?: string; closedAt?: string; costYen?: number; alarmKey?: string
+  logs: IncidentLog[]
 }
