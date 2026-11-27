@@ -11,7 +11,7 @@ import type { Tone } from '../logic/status'
 import type { ReportProgress } from '../logic/reportWorkflow'
 import type { Inspection, MeasurementEntry, MeasurementKind, ReportReview, Site } from '../types'
 
-const checkpointTone: Record<CheckpointKind, Tone> = { trend: 'amber', nearThreshold: 'amber', previousFinding: 'amber', openRepair: 'blue' }
+const checkpointTone: Record<CheckpointKind, Tone> = { trend: 'amber', nearThreshold: 'amber', previousFinding: 'amber', openRepair: 'blue', incident: 'amber' }
 
 // highlighted：今回の確認ポイントになっている測定欄
 function MeasurementCell({ entries, kind, pcsId, circuitId, highlighted }: { entries: MeasurementEntry[]; kind: MeasurementKind; pcsId?: string; circuitId?: string; highlighted?: Set<string> }) {
