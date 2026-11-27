@@ -16,7 +16,7 @@ export function inspectionFromReview(review: ReportReview, previous = review): I
 }
 
 const content = (inspection: Inspection, site: Site) => JSON.stringify({
-  siteId: inspection.siteId, scheduledOn: inspection.scheduledOn, inspectedOn: inspection.inspectedOn ?? inspection.scheduledOn,
+  siteId: inspection.siteId, kind: inspection.kind ?? '定期点検', scheduledOn: inspection.scheduledOn, inspectedOn: inspection.inspectedOn ?? inspection.scheduledOn,
   inspector: inspection.inspector, weather: inspection.weather, visual: inspection.visual, measurements: inspection.measurements, findings: inspection.findings,
   header: inspection.reportHeader ?? { siteName: site.name, owner: site.owner }, text: inspection.reportText ?? buildReportText(inspection, site), layout: inspection.reportLayout ?? [], options: inspection.reportOptions,
 })

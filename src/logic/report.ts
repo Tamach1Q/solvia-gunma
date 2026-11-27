@@ -19,7 +19,7 @@ export function overallCounts(inspection: Inspection) {
 export function reportSummary(inspection: Inspection, site: Site) {
   const counts = overallCounts(inspection)
   const date = formatDate(inspection.inspectedOn ?? inspection.scheduledOn)
-  const head = `${date}、${site.name}の定期点検（目視${counts.visualCount}項目・測定${counts.measurementCount}項目）を実施しました。`
+  const head = `${date}、${site.name}の${inspection.kind ?? '定期点検'}（目視${counts.visualCount}項目・測定${counts.measurementCount}項目）を実施しました。`
   const result = counts.needsAction ? `${counts.needsAction}件で対応が必要な状態を確認しました。内容とご提案は以下のとおりです。` : '対応が必要な項目はありませんでした。'
   const caution = counts.caution ? `また、${counts.caution}件は基準内ですが推移の確認が必要です。` : ''
   return head + result + caution

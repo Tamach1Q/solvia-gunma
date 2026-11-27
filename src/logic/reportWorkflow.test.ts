@@ -74,6 +74,15 @@ describe('点検と報告書チェックの連携', () => {
     expect(done.inspections.some(item => item.siteId === site.siteId && item.scheduledOn === '2027-10-28')).toBe(true)
     expect(completeInspection(done, inspection.inspectionId, '2026-10-28')).toBe(done)
   })
+  it('駆けつけ点検を完了しても翌年の定期点検を増やさない', async () => {
+    const emergency: DemoState = { ...draft, inspections: draft.inspections.map(item => item.inspectionId === inspection.inspectionId ? { ...item, kind: '駆けつけ点検', incidentId: 'INC-test' } : item) }
+    const waiting = await checked(submitInspectionReport(emergency, inspection.inspectionId, now))
+    const approved = approveInspectionReport(waiting, reviewOf(waiting).reviewId, '確認担当', true, now)
+    const done = completeInspection(approved, inspection.inspectionId, '2026-10-28')
+    expect(sourceOf(done).status).toBe('完了')
+    expect(done.inspections).toHaveLength(approved.inspections.length)
+    expect(done.repairCases.filter(item => item.inspectionId === inspection.inspectionId)).toHaveLength(2)
+  })
   it('承認後に元の文章が変われば完了できず、再提出で承認を取り直す', async () => {
     const waiting = await checked(submitted())
     const approved = approveInspectionReport(waiting, reviewOf(waiting).reviewId, '確認担当', true, now)

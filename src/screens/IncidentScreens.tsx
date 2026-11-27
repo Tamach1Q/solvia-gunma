@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { formatDateTime, formatNumber, formatShortDate } from '../logic/format'
 import { toDateString } from '../logic/dates'
-import { canCloseIncident, incidentDecisions, incidentStatus } from '../logic/incidents'
+import { canCloseIncident, incidentDecisions, incidentStatus, preliminaryChecks } from '../logic/incidents'
 import type { Incident, IncidentDecision, IncidentLogKind, IncidentSource, Inspection, RepairCase, Site } from '../types'
 
 type Common = { sites: Site[]; inspections: Inspection[]; repairCases: RepairCase[] }
@@ -58,7 +58,7 @@ export function IncidentDetailScreen({ incident, site, inspections, repairCases,
     </div></section>
     <section className="panel"><header className="panel-header"><h2>一次切り分け・対応判断</h2></header><div className="repair-form">
       <p>監視情報：{incident.title}</p>
-      <p className="text-muted">原因は確定していません。監視履歴・気象・通信状況・機器資料を確認してください。</p>
+      <p className="text-muted">原因は確定していません。確認すべき情報：</p><ul>{preliminaryChecks(incident.title).map(check => <li key={check}>{check}</li>)}</ul>
       <label className="review-input">対応方針<select disabled={closed} value={decision} onChange={event => setDecision(event.target.value as IncidentDecision)}>{incidentDecisions.map(value => <option key={value}>{value}</option>)}</select></label>
       <label className="review-input">判断理由<textarea disabled={closed} value={reason} onChange={event => setReason(event.target.value)} /></label>
       <button className="button button-primary" disabled={closed || decision === '未判断' || !reason.trim()} onClick={() => onLog('判断', decision + '：' + reason.trim(), { decision, reason: reason.trim() })}>対応判断を記録</button>

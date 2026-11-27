@@ -28,3 +28,11 @@ export function canCloseIncident(incident: Incident, inspections: Inspection[], 
   const visits = inspections.filter(item => item.incidentId === incident.id)
   return incident.decision !== '未判断' && !visits.some(item => item.status !== '完了') && !repairs.some(item => visits.some(visit => visit.inspectionId === item.inspectionId) && item.status !== '完了') && (!!incident.recoveredAt || incident.decision === '対応不要' || incident.decision === '現状維持')
 }
+
+// MOCK: アラーム文言に基づく確認項目のみ。実際の計測・気象データや生成AIは使用しない。
+export function preliminaryChecks(title: string): string[] {
+  if (title.includes('通信')) return ['最終受信時刻と他機器の通信状況', '監視サービスの障害情報・通信機器の状態']
+  if (title.includes('PCS') && title.includes('停止')) return ['対象PCSのエラーコードと停止・復帰履歴', '他PCSの出力・系統電圧・通信状態']
+  if (title.includes('発電量') || title.includes('出力')) return ['直近の日射量・天候と実績の比較', 'PCS別出力・出力制御・欠測の有無']
+  return ['設備の異常履歴と最新の状態', 'メーカー資料・過去の対応履歴']
+}

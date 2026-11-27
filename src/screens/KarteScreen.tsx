@@ -11,13 +11,14 @@ import { circuitLabel, measurementValue } from '../logic/labels'
 import { decisionWord, repairResult } from '../logic/repairs'
 import { siteCircuits } from '../logic/site'
 import { repairTone } from '../logic/status'
-import type { Inspection, RepairCase, Site } from '../types'
+import { incidentStatus } from '../logic/incidents'
+import type { Incident, Inspection, RepairCase, Site } from '../types'
 
 const recordedStatuses: Inspection['status'][] = ['提出済み', '報告書作成済み', '完了']
 const dateOf = (inspection: Inspection) => inspection.inspectedOn ?? inspection.scheduledOn
 
 // 発電所カルテ（SDD 4.7）。点検を完了すると今回値が推移に加わり、1年後の予定が「次回点検」に出る。
-export function KarteScreen({ sites, site, inspections, repairCases, onSelectSite, onOpenInspection, onOpenRepair }: { sites: Site[]; site: Site; inspections: Inspection[]; repairCases: RepairCase[]; onSelectSite: (siteId: string) => void; onOpenInspection: (inspectionId: string) => void; onOpenRepair: (caseId: string) => void }) {
+export function KarteScreen({ sites, site, inspections, repairCases, incidents, onOpenIncident, onSelectSite, onOpenInspection, onOpenRepair }: { sites: Site[]; site: Site; inspections: Inspection[]; repairCases: RepairCase[]; incidents: Incident[]; onOpenIncident: (id: string) => void; onSelectSite: (siteId: string) => void; onOpenInspection: (inspectionId: string) => void; onOpenRepair: (caseId: string) => void }) {
   const siteInspections = useMemo(() => inspections.filter(item => item.siteId === site.siteId).sort((a, b) => dateOf(b).localeCompare(dateOf(a))), [inspections, site.siteId])
   const recorded = siteInspections.filter(item => recordedStatuses.includes(item.status)).reverse().slice(-4)
   const next = [...siteInspections].reverse().find(item => !recordedStatuses.includes(item.status))
@@ -73,6 +74,10 @@ export function KarteScreen({ sites, site, inspections, repairCases, onSelectSit
       </> : <p className="panel-empty">まだ点検の記録がありません。</p>}
     </section>
 
+    <section className="panel">
+      <header className="panel-header"><h2>不具合対応履歴</h2><span className="panel-count">{incidents.filter(item => item.siteId === site.siteId).length}件</span></header>
+      {incidents.some(item => item.siteId === site.siteId) ? <ul className="history-list">{incidents.filter(item => item.siteId === site.siteId).sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)).map(item => <li key={item.id}><span>{formatDate(item.occurredAt)}</span><button className="link-button" onClick={() => onOpenIncident(item.id)}>{item.title}</button><span>{incidentStatus(item, inspections, repairCases)}</span></li>)}</ul> : <p className="panel-empty">不具合対応の記録はありません。</p>}
+    </section>
     <div className="karte-columns">
       <section className="panel">
         <header className="panel-header"><h2>点検履歴</h2><span className="panel-count">{siteInspections.length}件</span></header>
